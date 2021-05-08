@@ -6,6 +6,11 @@ Source codes and ready-made drivers for video camera matrices
 * SigmaStar
 * XiongMai
 
+![GitHub repo size](https://img.shields.io/github/repo-size/OpenIPC/sensors)
+![GitHub issues](https://img.shields.io/github/issues/OpenIPC/sensors)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/OpenIPC/sensors)
+[![License](https://img.shields.io/github/license/OpenIPC/sensors)](https://opensource.org/licenses/MIT)
+
 -----
 
 ### Supporting
