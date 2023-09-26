@@ -664,9 +664,9 @@ static int pCus_init(ms_cus_sensor* handle)
             }
     */
 
-    pCus_SetAEGain(handle, 1024); // Set sensor gain = 1x
-    pCus_SetAEUSecs(handle, 30000);
-    pCus_AEStatusNotify(handle, CUS_FRAME_ACTIVE);
+    // pCus_SetAEGain(handle,1024); //Set sensor gain = 1x
+    // pCus_SetAEUSecs(handle, 30000);
+    // pCus_AEStatusNotify(handle,CUS_FRAME_ACTIVE);
 
     // CamOsPrintf("pCus_init = %d us \n",timeGetTimeU()-TStart);
 
@@ -1105,7 +1105,7 @@ static int cus_camsensor_init_handle(ms_cus_sensor* drv_handle)
     ////////////////////////////////////
     //    sensor model ID                           //
     ////////////////////////////////////
-    strcpy(handle->model_id, "gc2053_MIPI");
+    sprintf(handle->model_id, "gc2053_MIPI");
 
     ////////////////////////////////////
     //    sensor interface info       //
@@ -1141,7 +1141,7 @@ static int cus_camsensor_init_handle(ms_cus_sensor* drv_handle)
     handle->video_res_supported.res[0].crop_start_y = 0;
     handle->video_res_supported.res[0].nOutputWidth = 1920;
     handle->video_res_supported.res[0].nOutputHeight = 1080;
-    SENSOR_DMSG(handle->video_res_supported.res[0].strResDesc, "1920x1080@30fps");
+    sprintf(handle->video_res_supported.res[0].strResDesc, "1920x1080@30fps");
 
     // i2c
 

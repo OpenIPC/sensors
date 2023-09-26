@@ -17,14 +17,13 @@ rights to any and all damages, losses, costs and expenses resulting therefrom.
 */
 
 /** @defgroup group1 ISP Sensor Driver Interface
-* @{
-*/
+ * @{
+ */
 
 #ifndef DRV_MS_CUS_SENSOR_H_
 #define DRV_MS_CUS_SENSOR_H_
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include <sensor_i2c_api.h>
@@ -32,12 +31,12 @@ extern "C"
 #define I2C_RETRYTIME (5)
 
 #ifndef SUCCESS
-#define FAIL        (-1)
-#define SUCCESS     0
+#define FAIL (-1)
+#define SUCCESS 0
 #endif
 
 #ifdef __cplusplus
-#define EXPORT_CUS  extern "C"
+#define EXPORT_CUS extern "C"
 #else
 #define EXPORT_CUS
 #endif
@@ -57,47 +56,45 @@ extern "C"
 //#define usleep(usec)  udelay(usec)
 //#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
-#define SENSOR_DRIVER_MODE_NOT_SUUPORT                          (0xFFFF)
+#define SENSOR_DRIVER_MODE_NOT_SUUPORT (0xFFFF)
 
 struct __ms_cus_sensor; /**< Sensor driver handle */
-//struct __ISensorAPI; /**< Sensor to ISP control interface */
+// struct __ISensorAPI; /**< Sensor to ISP control interface */
 
 /*! @brief Resolution descriptor*/
-typedef struct _cus_camsensor_res{
-    u32 width;      /**< Image crop width */
-    u32 height;     /**< Image crop height */
+typedef struct _cus_camsensor_res {
+    u32 width; /**< Image crop width */
+    u32 height; /**< Image crop height */
     u32 max_fps; /**< Max fps in this resolution */
-    u32 min_fps;  /**< Min fps in this resolution*/
+    u32 min_fps; /**< Min fps in this resolution*/
     u32 crop_start_x;
     u32 crop_start_y;
     u32 nOutputWidth; /**< Sensor actual output width */
     u32 nOutputHeight; /**< Sensor actual output height */
     char strResDesc[32];
-    u32 nMinFrameLengthLine;    // in Line
+    u32 nMinFrameLengthLine; // in Line
     u32 nRowTime;
 } __attribute__((packed, aligned(4))) cus_camsensor_res;
 
 /*! @brief Resolution list*/
-typedef struct _cus_camsensor_res_list
-{
-    u32 num_res;                        /**< number of sensor resolution in list */
-    u32 ulcur_res;                        /**< current sensor resolution*/
-    cus_camsensor_res res[12];      /**< resolution list */
+typedef struct _cus_camsensor_res_list {
+    u32 num_res; /**< number of sensor resolution in list */
+    u32 ulcur_res; /**< current sensor resolution*/
+    cus_camsensor_res res[12]; /**< resolution list */
 } __attribute__((packed, aligned(4))) cus_camsensor_res_list;
-
 
 /*! @brief Select sensor type */
 typedef enum {
-    ISP_SOC,                /**< Not support */
-    ISP_EXT                 /**< sensor without built-in ISP */
+    ISP_SOC, /**< Not support */
+    ISP_EXT /**< sensor without built-in ISP */
 } CUS_CAMSENSOR_ISPTYPE;
 
 /*! @brief Sensor bayer raw pixel order */
 typedef enum {
-    CUS_BAYER_RG = 0,       /**< bayer data start with R channel */
-    CUS_BAYER_GR,             /**<  bayer data start with Gr channel */
-    CUS_BAYER_BG,             /**<  bayer data start with B channel */
-    CUS_BAYER_GB              /**<  bayer data start with Gb channel */
+    CUS_BAYER_RG = 0, /**< bayer data start with R channel */
+    CUS_BAYER_GR, /**<  bayer data start with Gr channel */
+    CUS_BAYER_BG, /**<  bayer data start with B channel */
+    CUS_BAYER_GB /**<  bayer data start with Gb channel */
 } CUS_SEN_BAYER;
 
 typedef enum {
@@ -114,59 +111,57 @@ typedef enum {
 
 /*! @brief Set sensor image mirror and flip.*/
 typedef enum {
-    CUS_ORIT_M0F0,                  /**< mirror, flip unchanged */
-    CUS_ORIT_M1F0,                  /**< mirror changed, flip unchanged */
-    CUS_ORIT_M0F1,                  /**< mirror unchanged, flip changed */
-    CUS_ORIT_M1F1,                  /**< mirror and flip changed */
+    CUS_ORIT_M0F0, /**< mirror, flip unchanged */
+    CUS_ORIT_M1F0, /**< mirror changed, flip unchanged */
+    CUS_ORIT_M0F1, /**< mirror unchanged, flip changed */
+    CUS_ORIT_M1F1, /**< mirror and flip changed */
 } CUS_CAMSENSOR_ORIT;
-
 
 /*! @brief Get input source type.*/
 typedef enum {
-    CUS_SNR_ANADEC_SRC_NO_READY,    /**< input no ready */
-    CUS_SNR_ANADEC_SRC_DISCNT,      /**< input disconnect */
-    CUS_SNR_ANADEC_SRC_PAL,         /**< input type is PAL */
-    CUS_SNR_ANADEC_SRC_NTSC,        /**< input type is NTSC */
-    CUS_SNR_ANADEC_SRC_HD_25P,      /**< input source type is HD */
-    CUS_SNR_ANADEC_SRC_HD_30P,      /**< input source type is HD */
-    CUS_SNR_ANADEC_SRC_HD_50P,      /**< input source type is HD */
-    CUS_SNR_ANADEC_SRC_HD_60P,      /**< input source type is HD */
-    CUS_SNR_ANADEC_SRC_FHD_25P,     /**< input source type is FHD */
-    CUS_SNR_ANADEC_SRC_FHD_30P,     /**< input source type is FHD */
-}CUS_SNR_ANADEC_SRC_TYPE;
-
+    CUS_SNR_ANADEC_SRC_NO_READY, /**< input no ready */
+    CUS_SNR_ANADEC_SRC_DISCNT, /**< input disconnect */
+    CUS_SNR_ANADEC_SRC_PAL, /**< input type is PAL */
+    CUS_SNR_ANADEC_SRC_NTSC, /**< input type is NTSC */
+    CUS_SNR_ANADEC_SRC_HD_25P, /**< input source type is HD */
+    CUS_SNR_ANADEC_SRC_HD_30P, /**< input source type is HD */
+    CUS_SNR_ANADEC_SRC_HD_50P, /**< input source type is HD */
+    CUS_SNR_ANADEC_SRC_HD_60P, /**< input source type is HD */
+    CUS_SNR_ANADEC_SRC_FHD_25P, /**< input source type is FHD */
+    CUS_SNR_ANADEC_SRC_FHD_30P, /**< input source type is FHD */
+} CUS_SNR_ANADEC_SRC_TYPE;
 
 /*! @brief ISP AE event notifycation*/
 typedef enum {
     CUS_FRAME_INACTIVE = 0, /**< Frame end */
-    CUS_FRAME_ACTIVE = 1,/**< Frame start */
+    CUS_FRAME_ACTIVE = 1, /**< Frame start */
 } CUS_CAMSENSOR_AE_STATUS_NOTIFY;
 
 /*! @brief Sensor bayer raw (8/10 bits) to 12bits mode control */
 typedef enum {
-    CUS_SEN_8TO12_7074,       /**< Do not use*/
-    CUS_SEN_8TO12_7000,       /**< Sensor bayer raw is 8 bits*/
-    CUS_SEN_8TO12_114118,   /**< Do not use*/
-    CUS_SEN_8TO12_11400,     /**< Do not use*/
-    CUS_SEN_10TO12_9098,     /**< Do not use*/
-    CUS_SEN_10TO12_9000,     /**< Sensor bayer raw is 10 bits*/
+    CUS_SEN_8TO12_7074, /**< Do not use*/
+    CUS_SEN_8TO12_7000, /**< Sensor bayer raw is 8 bits*/
+    CUS_SEN_8TO12_114118, /**< Do not use*/
+    CUS_SEN_8TO12_11400, /**< Do not use*/
+    CUS_SEN_10TO12_9098, /**< Do not use*/
+    CUS_SEN_10TO12_9000, /**< Sensor bayer raw is 10 bits*/
     CUS_SEN_10TO12_1121110, /**< Do not use*/
-    CUS_SEN_10TO12_11200    /**< Do not use*/
+    CUS_SEN_10TO12_11200 /**< Do not use*/
 } CUS_SEN_FMT_CONV_MODE;
 
 /*! @brief Sensor input raw data precision */
 typedef enum {
-    CUS_DATAPRECISION_8 = 0,    /**< raw data precision is 8bits */
-    CUS_DATAPRECISION_10 = 1,   /**< raw data precision is 10bits */
-    CUS_DATAPRECISION_16 = 2,    /**< raw data precision is 16bits */
-    CUS_DATAPRECISION_12 = 3,   /**< raw data precision is 12bits */
-    CUS_DATAPRECISION_14 = 4,   /**< raw data precision is 14bits */
+    CUS_DATAPRECISION_8 = 0, /**< raw data precision is 8bits */
+    CUS_DATAPRECISION_10 = 1, /**< raw data precision is 10bits */
+    CUS_DATAPRECISION_16 = 2, /**< raw data precision is 16bits */
+    CUS_DATAPRECISION_12 = 3, /**< raw data precision is 12bits */
+    CUS_DATAPRECISION_14 = 4, /**< raw data precision is 14bits */
 } CUS_DATAPRECISION;
 
 /*! @brief Select sensor data intarface */
 typedef enum {
     CUS_SENIF_BUS_PARL = 0, /**< sensor data bus is parallel bus */
-    CUS_SENIF_BUS_MIPI = 1,  /**<  sensor data bus is mipi */
+    CUS_SENIF_BUS_MIPI = 1, /**<  sensor data bus is mipi */
     CUS_SENIF_BUS_BT601 = 2,
     CUS_SENIF_BUS_BT656 = 3,
     CUS_SENIF_BUS_BT1120 = 4,
@@ -179,15 +174,14 @@ typedef enum {
 
 /*! @brief Select pin polarity */
 typedef enum {
-    CUS_CLK_POL_POS = 0,    /**< High active */
-    CUS_CLK_POL_NEG         /**< Low active */
+    CUS_CLK_POL_POS = 0, /**< High active */
+    CUS_CLK_POL_NEG /**< Low active */
 } CUS_CLK_POL;
 
-typedef enum
-{
+typedef enum {
     CUS_SENSOR_YUV_ORDER_CY = 0,
     CUS_SENSOR_YUV_ORDER_YC = 1,
-}CUS_SENSOR_YUV_ORDER;
+} CUS_SENSOR_YUV_ORDER;
 
 /*! @brief Sensor master clock select */
 typedef enum {
@@ -207,16 +201,16 @@ typedef enum {
     CUS_CMU_CLK_LPLL_DIV2,
     CUS_CMU_CLK_LPLL_DIV4,
     CUS_CMU_CLK_LPLL_DIV8,
-} CUS_MCLK_FREQ; //Depends on chip.
+} CUS_MCLK_FREQ; // Depends on chip.
 
-//Depends on chip definition.
+// Depends on chip definition.
 typedef enum {
     CUS_SR0_PAR_DISABLE,
     CUS_SR0_PAR_MODE_1,
     CUS_SR0_PAR_MODE_2,
 } CUS_SR0_PAR_MODE;
 
-//Depends on chip definition.
+// Depends on chip definition.
 typedef enum {
     CUS_SR0_BT656_DISABLE,
     CUS_SR0_BT656_MODE_1,
@@ -225,13 +219,13 @@ typedef enum {
     CUS_SR0_BT656_MODE_4,
 } CUS_SR0_BT656_MODE;
 
-//Depends on chip definition.
+// Depends on chip definition.
 typedef enum {
     CUS_SR1_BT656_DISABLE,
     CUS_SR1_BT656_MODE_1,
 } CUS_SR1_BT656_MODE;
 
-//Depends on chip definition.
+// Depends on chip definition.
 typedef enum {
     CUS_SR0_BT601_DISABLE,
     CUS_SR0_BT601_MODE_1,
@@ -240,14 +234,14 @@ typedef enum {
     CUS_SR0_BT601_MODE_4,
 } CUS_SR0_BT601_MODE;
 
-//Depends on chip definition.
+// Depends on chip definition.
 typedef enum {
     CUS_SR0_MIPI_DISABLE,
     CUS_SR0_MIPI_MODE_1,
     CUS_SR0_MIPI_MODE_2,
 } CUS_SR0_MIPI_MODE;
 
-//Depends on chip definition.
+// Depends on chip definition.
 typedef enum {
     CUS_SR1_MIPI_DISABLE,
     CUS_SR1_MIPI_MODE_1,
@@ -256,49 +250,43 @@ typedef enum {
     CUS_SR1_MIPI_MODE_4,
 } CUS_SR1_MIPI_MODE;
 
-//Depends on chip definition.
-typedef enum
-{
+// Depends on chip definition.
+typedef enum {
     CUS_VIF_BT656_EAV_DETECT = 0,
     CUS_VIF_BT656_SAV_DETECT = 1,
-}CUS_VIF_BT656_CHANNEL_SELECT;
+} CUS_VIF_BT656_CHANNEL_SELECT;
 
-//Depends on chip definition.
-typedef enum
-{
+// Depends on chip definition.
+typedef enum {
     CUS_VIF_BT656_VSYNC_DELAY_1LINE = 0,
     CUS_VIF_BT656_VSYNC_DELAY_2LINE = 1,
     CUS_VIF_BT656_VSYNC_DELAY_0LINE = 2,
     CUS_VIF_BT656_VSYNC_DELAY_AUTO = 3,
-}CUS_VIF_BT656_VSYNC_DELAY;
+} CUS_VIF_BT656_VSYNC_DELAY;
 
-typedef enum
-{
+typedef enum {
     CUS_SENSOR_FUNC_DISABLE = 0,
     CUS_SENSOR_FUNC_ENABLE = 1,
-}CUS_SENSOR_FUNC;
+} CUS_SENSOR_FUNC;
 
-typedef enum
-{
+typedef enum {
     CUS_SENSOR_PAD_GROUP_A = 0,
     CUS_SENSOR_PAD_GROUP_B = 1,
     CUS_SENSOR_PAD_GROUP_C = 2,
     CUS_SENSOR_PAD_GROUP_D = 3,
-}CUS_SENSOR_PAD_GROUP;
+} CUS_SENSOR_PAD_GROUP;
 
-typedef enum
-{
+typedef enum {
     CUS_SENSOR_MASTER_MODE = 0,
     CUS_SENSOR_SLAVE_MODE = 1,
-}CUS_SENSOR_MODE;
+} CUS_SENSOR_MODE;
 
-typedef enum
-{
+typedef enum {
     CUS_SENSOR_CHANNEL_MODE_REALTIME_NORMAL = 0,
     CUS_SENSOR_CHANNEL_MODE_REALTIME_HDR = 1,
     CUS_SENSOR_CHANNEL_MODE_RAW_STORE = 2,
     CUS_SENSOR_CHANNEL_MODE_RAW_STORE_HDR = 3,
-}CUS_SENSOR_CHANNEL_MODE;
+} CUS_SENSOR_CHANNEL_MODE;
 
 typedef struct {
     unsigned int gain;
@@ -310,17 +298,17 @@ typedef struct {
 //////////////////////////////////////
 
 typedef struct {
-    u32 length;     //header length
-    u32 version;         //version
-}CUS_CAMSENSOR_CAP;
+    u32 length; // header length
+    u32 version; // version
+} CUS_CAMSENSOR_CAP;
 
 /////////////////// ISP for SENSOR API ///////////////////
 typedef enum {
-    CUS_INT_TASK_AE     = (1<<0),
-    CUS_INT_TASK_AWB    = (1<<1),
-    CUS_INT_TASK_AF     = (1<<2),
-    CUS_INT_TASK_VS     = (1<<3),
-    CUS_INT_TASK_VDOS   = (1<<4),
+    CUS_INT_TASK_AE = (1 << 0),
+    CUS_INT_TASK_AWB = (1 << 1),
+    CUS_INT_TASK_AF = (1 << 2),
+    CUS_INT_TASK_VS = (1 << 3),
+    CUS_INT_TASK_VDOS = (1 << 4),
 } CUS_INT_TASK_TYPE;
 
 #define MAX_RUN_ORDER 16
@@ -333,17 +321,17 @@ typedef struct {
 /////////////////// Shutter Info ///////////////////////
 /*! @brief Report shutter information */
 typedef struct {
-    u32 length;    /**< struct size */
-    u32 max;       /**< maximun shutter in us*/
-    u32 min;        /**< minimum shutter in us*/
-    u32 step;       /**< shutter in step us*/
+    u32 length; /**< struct size */
+    u32 max; /**< maximun shutter in us*/
+    u32 min; /**< minimum shutter in us*/
+    u32 step; /**< shutter in step us*/
 } CUS_SHUTTER_INFO;
 
 ////////////////// CSI CLOCK ////////////////////////
 /*! @brief Select MIPI clock*/
 typedef enum {
     CUS_CSI_CLK_DISABLE = -1, /**< Disable MIPI clock*/
-    CUS_CSI_CLK_108M = 0,    /**< MIPI pixel rate 864Mbps (1-lane)*/
+    CUS_CSI_CLK_108M = 0, /**< MIPI pixel rate 864Mbps (1-lane)*/
     CUS_CSI_CLK_86M = 1, /**< MIPI pixel rate 344Mbps(1-lane)*/
     CUS_CSI_CLK_144M = 2, /**< MIPI pixel rate 1152Mbps(1-lane)*/
     CUS_CSI_CLK_172M = 3,
@@ -353,104 +341,101 @@ typedef enum {
     CUS_CSI_CLK_24M = 7,
     CUS_CSI_CLK_12M = 8,
     CUS_CSI_CLK_123M = 9
-}CUS_CSI_CLK;
+} CUS_CSI_CLK;
 
 ///////////////// SENSOR PIN CONFIG/////////////////
 /*! @brief Sensor pin assignment*/
 typedef enum {
-    CUS_SR_PAD_CFG_1 = 1,       /**< Pin config for MIPI 1/2 lanes*/
-    CUS_SR_PAD_CFG_MIPI = 1,  /**< Pin config for  MIPI 1/2 lanes*/
-    CUS_SR_PAD_CFG_2 = 2,       /**< Reserved */
-    CUS_SR_PAD_CFG_3 = 3,       /**< Reserved */
-    CUS_SR_PAD_CFG_10BITS = 4,    /**< Pin config for parallel interface 10 bits */
-    CUS_SR_PAD_CFG_4 = 4,        /**< Pin config for parallel interface 12 bits */
-    CUS_SR_PAD_CFG_12BITS = 5,  /**< Pin config for parallel interface 12 bits */
-    CUS_SR_PAD_CFG_5 = 5,       /**< Pin config for parallel interface 12 bits */
-    CUS_SR_PAD_CFG_6 = 6       /**< Pin config for parallel interface 12 bits */
- }CUS_SR_PAD_CFG;
+    CUS_SR_PAD_CFG_1 = 1, /**< Pin config for MIPI 1/2 lanes*/
+    CUS_SR_PAD_CFG_MIPI = 1, /**< Pin config for  MIPI 1/2 lanes*/
+    CUS_SR_PAD_CFG_2 = 2, /**< Reserved */
+    CUS_SR_PAD_CFG_3 = 3, /**< Reserved */
+    CUS_SR_PAD_CFG_10BITS = 4, /**< Pin config for parallel interface 10 bits */
+    CUS_SR_PAD_CFG_4 = 4, /**< Pin config for parallel interface 12 bits */
+    CUS_SR_PAD_CFG_12BITS = 5, /**< Pin config for parallel interface 12 bits */
+    CUS_SR_PAD_CFG_5 = 5, /**< Pin config for parallel interface 12 bits */
+    CUS_SR_PAD_CFG_6 = 6 /**< Pin config for parallel interface 12 bits */
+} CUS_SR_PAD_CFG;
 
 /*! @brief virtual channel0 hsync. mode */
-typedef enum
-{
-    PACKET_HEADER_EDGE1 = 0,    /**< packet header edge */
-    PACKET_HEADER_EDGE2 = 1,    /**< line end edge */
-    PACKET_HEADER_EDGE3 = 2,    /**< line start edge */
-    PACKET_FOOTER_EDGE = 3,      /**< packet footer edge */
-}CUS_CSI_VC_HS_MODE;
+typedef enum {
+    PACKET_HEADER_EDGE1 = 0, /**< packet header edge */
+    PACKET_HEADER_EDGE2 = 1, /**< line end edge */
+    PACKET_HEADER_EDGE3 = 2, /**< line start edge */
+    PACKET_FOOTER_EDGE = 3, /**< packet footer edge */
+} CUS_CSI_VC_HS_MODE;
 
-typedef enum
-{
+typedef enum {
     CUS_HDR_MODE_NONE = 0,
     CUS_HDR_MODE_SONY_DOL = 1,
     CUS_HDR_MODE_DCG = 2,
     CUS_HDR_MODE_EMBEDDED_RAW8 = 3,
     CUS_HDR_MODE_EMBEDDED_RAW10 = 4,
     CUS_HDR_MODE_EMBEDDED_RAW12 = 5,
-    CUS_HDR_MODE_EMBEDDED_RAW16 = 6, //Only for OV2718?
+    CUS_HDR_MODE_EMBEDDED_RAW16 = 6, // Only for OV2718?
     CUS_HDR_MODE_LI = 7,
     CUS_HDR_MODE_MULTI_VC = 8,
-}CUS_HDR_MODE;
+} CUS_HDR_MODE;
 
-typedef enum
-{
+typedef enum {
     // Index 0
-    SENSOR_DRIVER_MODE_VGA_30P_RESOLUTION,                    // 640*360 30P
-    SENSOR_DRIVER_MODE_VGA_50P_RESOLUTION,                    // 640*360 50P
-    SENSOR_DRIVER_MODE_VGA_60P_RESOLUTION,                    // 640*360 60P
-    SENSOR_DRIVER_MODE_VGA_100P_RESOLUTION,                   // 640*360 100P
-    SENSOR_DRIVER_MODE_VGA_120P_RESOLUTION,                   // 640*360 120P
+    SENSOR_DRIVER_MODE_VGA_30P_RESOLUTION, // 640*360 30P
+    SENSOR_DRIVER_MODE_VGA_50P_RESOLUTION, // 640*360 50P
+    SENSOR_DRIVER_MODE_VGA_60P_RESOLUTION, // 640*360 60P
+    SENSOR_DRIVER_MODE_VGA_100P_RESOLUTION, // 640*360 100P
+    SENSOR_DRIVER_MODE_VGA_120P_RESOLUTION, // 640*360 120P
 
     // Index 5
-    SENSOR_DRIVER_MODE_HD_24P_RESOLUTION,                     // 1280*720 24P
-    SENSOR_DRIVER_MODE_HD_30P_RESOLUTION,                     // 1280*720 30P
-    SENSOR_DRIVER_MODE_HD_50P_RESOLUTION,                     // 1280*720 50P
-    SENSOR_DRIVER_MODE_HD_60P_RESOLUTION,                     // 1280*720 60P
-    SENSOR_DRIVER_MODE_HD_100P_RESOLUTION,                    // 1280*720 100P
+    SENSOR_DRIVER_MODE_HD_24P_RESOLUTION, // 1280*720 24P
+    SENSOR_DRIVER_MODE_HD_30P_RESOLUTION, // 1280*720 30P
+    SENSOR_DRIVER_MODE_HD_50P_RESOLUTION, // 1280*720 50P
+    SENSOR_DRIVER_MODE_HD_60P_RESOLUTION, // 1280*720 60P
+    SENSOR_DRIVER_MODE_HD_100P_RESOLUTION, // 1280*720 100P
 
     // Index 10
-    SENSOR_DRIVER_MODE_HD_120P_RESOLUTION,                    // 1280*720 120P
-    SENSOR_DRIVER_MODE_1600x900_30P_RESOLUTION,               // 1600*900 30P
-    SENSOR_DRIVER_MODE_FULL_HD_15P_RESOLUTION,                // 1920*1080 15P
-    SENSOR_DRIVER_MODE_FULL_HD_24P_RESOLUTION,                // 1920*1080 24P
-    SENSOR_DRIVER_MODE_FULL_HD_25P_RESOLUTION,                // 1920*1080 25P
+    SENSOR_DRIVER_MODE_HD_120P_RESOLUTION, // 1280*720 120P
+    SENSOR_DRIVER_MODE_1600x900_30P_RESOLUTION, // 1600*900 30P
+    SENSOR_DRIVER_MODE_FULL_HD_15P_RESOLUTION, // 1920*1080 15P
+    SENSOR_DRIVER_MODE_FULL_HD_24P_RESOLUTION, // 1920*1080 24P
+    SENSOR_DRIVER_MODE_FULL_HD_25P_RESOLUTION, // 1920*1080 25P
 
     // Index 15
-    SENSOR_DRIVER_MODE_FULL_HD_30P_RESOLUTION,                // 1920*1080 30P
-    SENSOR_DRIVER_MODE_FULL_HD_50P_RESOLUTION,                // 1920*1080 50P
-    SENSOR_DRIVER_MODE_FULL_HD_60P_RESOLUTION,                // 1920*1080 60P
-    SENSOR_DRIVER_MODE_SUPER_HD_30P_RESOLUTION,               // 2304*1296 30P
-    SENSOR_DRIVER_MODE_SUPER_HD_25P_RESOLUTION,               // 2304*1296 25P
+    SENSOR_DRIVER_MODE_FULL_HD_30P_RESOLUTION, // 1920*1080 30P
+    SENSOR_DRIVER_MODE_FULL_HD_50P_RESOLUTION, // 1920*1080 50P
+    SENSOR_DRIVER_MODE_FULL_HD_60P_RESOLUTION, // 1920*1080 60P
+    SENSOR_DRIVER_MODE_SUPER_HD_30P_RESOLUTION, // 2304*1296 30P
+    SENSOR_DRIVER_MODE_SUPER_HD_25P_RESOLUTION, // 2304*1296 25P
 
     // Index 20
-    SENSOR_DRIVER_MODE_SUPER_HD_24P_RESOLUTION,               // 2304*1296 24P
-    SENSOR_DRIVER_MODE_1440_30P_RESOLUTION,                   // 2560*1440 30P
-    SENSOR_DRIVER_MODE_2D7K_15P_RESOLUTION,                   // 2704*1524 15P
-    SENSOR_DRIVER_MODE_2D7K_30P_RESOLUTION,                   // 2704*1524 30P
-    SENSOR_DRIVER_MODE_4K2K_15P_RESOLUTION,                   // 3840*2160 15P
+    SENSOR_DRIVER_MODE_SUPER_HD_24P_RESOLUTION, // 2304*1296 24P
+    SENSOR_DRIVER_MODE_1440_30P_RESOLUTION, // 2560*1440 30P
+    SENSOR_DRIVER_MODE_2D7K_15P_RESOLUTION, // 2704*1524 15P
+    SENSOR_DRIVER_MODE_2D7K_30P_RESOLUTION, // 2704*1524 30P
+    SENSOR_DRIVER_MODE_4K2K_15P_RESOLUTION, // 3840*2160 15P
 
     // Index 25
-    SENSOR_DRIVER_MODE_4K2K_30P_RESOLUTION,                   // 3840*2160 30P
-    SENSOR_DRIVER_MODE_4TO3_VGA_30P_RESOLUTION,               // 640*480   30P
-    SENSOR_DRIVER_MODE_4TO3_1D2M_30P_RESOLUTION,              // 1280*960  30P
-    SENSOR_DRIVER_MODE_4TO3_1D5M_30P_RESOLUTION,              // 1440*1080 30P
-    SENSOR_DRIVER_MODE_4TO3_3M_15P_RESOLUTION,                // 2048*1536 15P
+    SENSOR_DRIVER_MODE_4K2K_30P_RESOLUTION, // 3840*2160 30P
+    SENSOR_DRIVER_MODE_4TO3_VGA_30P_RESOLUTION, // 640*480   30P
+    SENSOR_DRIVER_MODE_4TO3_1D2M_30P_RESOLUTION, // 1280*960  30P
+    SENSOR_DRIVER_MODE_4TO3_1D5M_30P_RESOLUTION, // 1440*1080 30P
+    SENSOR_DRIVER_MODE_4TO3_3M_15P_RESOLUTION, // 2048*1536 15P
 
     // Index 30
-    SENSOR_DRIVER_MODE_4TO3_3M_30P_RESOLUTION,                // 2048*1536 30P
-    SENSOR_DRIVER_MODE_4TO3_5M_15P_RESOLUTION,                // 2560*1920 15P
-    SENSOR_DRIVER_MODE_4TO3_5M_30P_RESOLUTION,                // 2560*1920 30P
-    SENSOR_DRIVER_MODE_4TO3_8M_15P_RESOLUTION,                // 3264*2448 15P
-    SENSOR_DRIVER_MODE_4TO3_8M_30P_RESOLUTION,                // 3264*2448 30P
+    SENSOR_DRIVER_MODE_4TO3_3M_30P_RESOLUTION, // 2048*1536 30P
+    SENSOR_DRIVER_MODE_4TO3_5M_15P_RESOLUTION, // 2560*1920 15P
+    SENSOR_DRIVER_MODE_4TO3_5M_30P_RESOLUTION, // 2560*1920 30P
+    SENSOR_DRIVER_MODE_4TO3_8M_15P_RESOLUTION, // 3264*2448 15P
+    SENSOR_DRIVER_MODE_4TO3_8M_30P_RESOLUTION, // 3264*2448 30P
 
     // Index 35
-    SENSOR_DRIVER_MODE_4TO3_10M_15P_RESOLUTION,               // 3648*2736 15P
-    SENSOR_DRIVER_MODE_4TO3_10M_30P_RESOLUTION,               // 3648*2736 30P
-    SENSOR_DRIVER_MODE_4TO3_12M_15P_RESOLUTION,               // 4032*3024 15P
-    SENSOR_DRIVER_MODE_4TO3_12M_30P_RESOLUTION,               // 4032*3024 30P
-    SENSOR_DRIVER_MODE_4TO3_14M_15P_RESOLUTION,               // 4352*3264 15P
+    SENSOR_DRIVER_MODE_4TO3_10M_15P_RESOLUTION, // 3648*2736 15P
+    SENSOR_DRIVER_MODE_4TO3_10M_30P_RESOLUTION, // 3648*2736 30P
+    SENSOR_DRIVER_MODE_4TO3_12M_15P_RESOLUTION, // 4032*3024 15P
+    SENSOR_DRIVER_MODE_4TO3_12M_30P_RESOLUTION, // 4032*3024 30P
+    SENSOR_DRIVER_MODE_4TO3_14M_15P_RESOLUTION, // 4352*3264 15P
 
     // Index 40
-    SENSOR_DRIVER_MODE_4TO3_14M_30P_RESOLUTION,               // 4352*3264 30P
+    SENSOR_DRIVER_MODE_4TO3_14M_30P_RESOLUTION, // 4352*3264 30P
     SENSOR_DRIVER_MODE_4K2K_24P_RESOLUTION,
     SENSOR_DRIVER_MODE_PAL_25P_RESOLUTION,
     SENSOR_DRIVER_MODE_NTSC_30P_RESOLUTION,
@@ -462,13 +447,12 @@ typedef enum
     SENSOR_DRIVER_MODE_FULL_HD_30P_RESOLUTION_HDR,
 } CUS_SNR_RESOLUTION;
 
-
 #ifdef __cplusplus
 extern "C"
 #endif
 
-/**@brief ISP sensor interface control API */
-typedef struct __ISensorIfAPI //isp sensor interface API
+    /**@brief ISP sensor interface control API */
+    typedef struct __ISensorIfAPI // isp sensor interface API
 {
     version_info version;
     /**@brief Reserved */
@@ -508,7 +492,7 @@ typedef struct __ISensorIfAPI //isp sensor interface API
     @param[in] lane_num Query max lane number.
     @retval SUCCESS or FAIL if error occurs.
     */
-    int (*QueryLaneNum)(u32 idx, u8 *max_lane);
+    int (*QueryLaneNum)(u32 idx, u8* max_lane);
 #if 0
     /** @brief Select pixel clock source
     @remarks Parallel interface only
@@ -597,7 +581,7 @@ typedef struct __ISensorIfAPI //isp sensor interface API
     */
     int (*SetIOPad)(u32 idx, CUS_SENIF_BUS ulSnrType, u32 ulSnrPadCfg);
 
-    //FOR CSI
+    // FOR CSI
 
     /** @brief Set maximum mipi data rate (amount of all lans)
     @remarks MIPI interface only.
@@ -641,7 +625,7 @@ typedef struct __ISensorIfAPI //isp sensor interface API
     @param[in] rx_data_skip_ns
     @retval SUCCESS or FAIL if error occurs.
     */
-    int (*SetCSI_clk_data_skip)(u32 idx, u8 rx_clk_skip_ns,u8 rx_data_skip_ns);
+    int (*SetCSI_clk_data_skip)(u32 idx, u8 rx_clk_skip_ns, u8 rx_data_skip_ns);
 
     /** @brief Configure MIPI hdr mode
     @remarks MIPI interface only
@@ -668,35 +652,35 @@ typedef struct __ISensorIfAPI //isp sensor interface API
     @param[in] cnt Skip counter
     @retval SUCCESS or FAIL if error occurs.
     */
-    int (*SetSkipFrame)(u32 idx, u32 fps, u32  cnt);
+    int (*SetSkipFrame)(u32 idx, u32 fps, u32 cnt);
 
     /** @brief Switch Vif PadID
     @remarks Switch Vif PadID mux
     @param[in] id Vif Select Source.
     @retval SUCCESS or FAIL if error occurs.
     */
-    int (*SetVIFSelectSource)(u32 id); ///2eff
+    int (*SetVIFSelectSource)(u32 id); /// 2eff
 
-}ISensorIfAPI;
+} ISensorIfAPI;
 
 typedef union {
-    //Parallel sensor
+    // Parallel sensor
     struct {
-        u32 parallel_reserved; //No additional attribute.
+        u32 parallel_reserved; // No additional attribute.
     } attr_parallel;
 
-    //MIPI sensor
+    // MIPI sensor
     struct {
         u32 mipi_lane_num;
-        u32 mipi_data_format; //0: YUV 422 format. 1: RGB pattern.
-        u32 mipi_yuv_order; //YUYV or UYVY
+        u32 mipi_data_format; // 0: YUV 422 format. 1: RGB pattern.
+        u32 mipi_yuv_order; // YUYV or UYVY
         u32 mipi_hsync_mode;
         u32 mipi_sampling_delay; /** < MIPI start sampling delay */ /*bit 0~7: clk_skip_ns. bit 8~15: data_skip_ns*/
         CUS_HDR_MODE mipi_hdr_mode;
         u32 mipi_hdr_virtual_channel_num;
     } attr_mipi;
 
-    //BT656 sensor
+    // BT656 sensor
     struct {
         u32 bt656_total_ch;
         u32 bt656_cur_ch;
@@ -708,62 +692,62 @@ typedef union {
         u32 bt656_hsync_inv;
         u32 bt656_vsync_inv;
         u32 bt656_clamp_en;
-        u32 bt656_yuv_order; //YUYV or UYVY
+        u32 bt656_yuv_order; // YUYV or UYVY
     } attr_bt656;
-}  InterfaceAttr_u;
+} InterfaceAttr_u;
 
 ///////////////////////////////////////////////////////
 
 /** @brief Sensor driver interface \n
 The function here are implemented by sensor driver.
 */
-typedef struct __ms_cus_sensor{
-    //short     lib_idx;      /**< Reserved , Do not use */
+typedef struct __ms_cus_sensor {
+    // short     lib_idx;      /**< Reserved , Do not use */
     version_info version;
-    char model_id[32];      /**< Please fill the sensor modle id string here then libcamera user can read model_id by using cameraGetSensorModelID() .*/
-    void *sen_handle;       /**< Reserved , Do not use */
-    void *private_data;     /**< sensor driver dependent variables should store in private_data and free when release */
-    void *slave_mode_set;   /**< Reserved , For sensor vsync/hsync control*/
+    char model_id[32]; /**< Please fill the sensor modle id string here then libcamera user can read model_id by using cameraGetSensorModelID() .*/
+    void* sen_handle; /**< Reserved , Do not use */
+    void* private_data; /**< sensor driver dependent variables should store in private_data and free when release */
+    void* slave_mode_set; /**< Reserved , For sensor vsync/hsync control*/
 
     // i2c
-    app_i2c_cfg i2c_cfg;           /**< Sensor i2c setting */
-    i2c_handle_t *i2c_bus;         /**< Handle to sensor i2c API. */
+    app_i2c_cfg i2c_cfg; /**< Sensor i2c setting */
+    i2c_handle_t* i2c_bus; /**< Handle to sensor i2c API. */
 
     // sensor if api
-    ISensorIfAPI *sensor_if_api;   /**< sensor interface API */
+    ISensorIfAPI* sensor_if_api; /**< sensor interface API */
 
     // ae parameters
-    int ae_gain_delay;      /**< How many frame delay from writing AE gain to take effect*/
-    int ae_shutter_delay;   /**< How many frame delay from writing AE shutter to take effect*/
+    int ae_gain_delay; /**< How many frame delay from writing AE gain to take effect*/
+    int ae_shutter_delay; /**< How many frame delay from writing AE shutter to take effect*/
     int ae_gain_ctrl_num;
     int ae_shutter_ctrl_num;
 
     // polarity
-    CUS_CLK_POL reset_POLARITY;   /** < Sensor REST pin polarity */
-    CUS_CLK_POL pwdn_POLARITY;    /** < Sensor Power Down pin polarity */
-    CUS_CLK_POL VSYNC_POLARITY;   /** < Sensor VSYNC polarity */
-    CUS_CLK_POL HSYNC_POLARITY;   /** < Sensor HSYNC pin polarity */
-    CUS_CLK_POL PCLK_POLARITY;    /** < Sensor Plxel Clock pin polarity */
+    CUS_CLK_POL reset_POLARITY; /** < Sensor REST pin polarity */
+    CUS_CLK_POL pwdn_POLARITY; /** < Sensor Power Down pin polarity */
+    CUS_CLK_POL VSYNC_POLARITY; /** < Sensor VSYNC polarity */
+    CUS_CLK_POL HSYNC_POLARITY; /** < Sensor HSYNC pin polarity */
+    CUS_CLK_POL PCLK_POLARITY; /** < Sensor Plxel Clock pin polarity */
 
     // sensor data enum list*/
-    CUS_CAMSENSOR_ISPTYPE   isp_type;    /** < Always use ISP_EXT */
-    CUS_SEN_BAYER           bayer_id;    /** < Sensor bayer raw pixel order */
-    CUS_SEN_RGBIR           RGBIR_id;    /** < Sensor bayer raw pixel order */
-    CUS_SENIF_BUS           sif_bus;     /** < Select sensor interface */
-    CUS_DATAPRECISION       data_prec;   /** < Raw data bits */
-    CUS_SEN_FMT_CONV_MODE   data_mode;   /** < Data convert mode*/
-    CUS_CAMSENSOR_ORIT      orient;      /** < Sensor mirror/flip */
-    CUS_SENSOR_PAD_GROUP    snr_pad_group;
-    CUS_SENSOR_MODE         snr_pad_mode;       /** < support master/slave mode sensor */
+    CUS_CAMSENSOR_ISPTYPE isp_type; /** < Always use ISP_EXT */
+    CUS_SEN_BAYER bayer_id; /** < Sensor bayer raw pixel order */
+    CUS_SEN_RGBIR RGBIR_id; /** < Sensor bayer raw pixel order */
+    CUS_SENIF_BUS sif_bus; /** < Select sensor interface */
+    CUS_DATAPRECISION data_prec; /** < Raw data bits */
+    CUS_SEN_FMT_CONV_MODE data_mode; /** < Data convert mode*/
+    CUS_CAMSENSOR_ORIT orient; /** < Sensor mirror/flip */
+    CUS_SENSOR_PAD_GROUP snr_pad_group;
+    CUS_SENSOR_MODE snr_pad_mode; /** < support master/slave mode sensor */
 
-    cus_camsensor_res_list  video_res_supported; /** < Resolution list */
-    InterfaceAttr_u         interface_attr;
+    cus_camsensor_res_list video_res_supported; /** < Resolution list */
+    InterfaceAttr_u interface_attr;
 
-   //sensor calibration
-    u32                     mclk;        /** < Sensor master clock frequency */
-    u32                     sat_mingain;    /**< Minimum AE gain */
-    u32                     ir_only_fmt;
-    u32                     nPixelSize;           //in nano meter
+    // sensor calibration
+    u32 mclk; /** < Sensor master clock frequency */
+    u32 sat_mingain; /**< Minimum AE gain */
+    u32 ir_only_fmt;
+    u32 nPixelSize; // in nano meter
 
     ////////////////////////////////////////////////
     // system functions
@@ -834,7 +818,7 @@ typedef struct __ms_cus_sensor{
     @retval SUCCESS or FAIL if error occurs.
     @remark This function is optional
     */
-    int (*pCus_sensor_SetPatternMode)(struct __ms_cus_sensor* handle,u32 mode);
+    int (*pCus_sensor_SetPatternMode)(struct __ms_cus_sensor* handle, u32 mode);
 
     // Normal
 
@@ -844,74 +828,74 @@ typedef struct __ms_cus_sensor{
     @retval Return SUCCESS if sensor matched or Retuen FAIL if sensor mismatch.
     @remark Read sensor ID through I2C
     */
-    int (*pCus_sensor_GetSensorID)(struct __ms_cus_sensor* handle, u32 *id);
+    int (*pCus_sensor_GetSensorID)(struct __ms_cus_sensor* handle, u32* id);
 
-     /** @brief Get resolution list
-    @param[in] handle Handle to sensor driver.
-    @param[out] id Receive supported resolution list
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
-    int (*pCus_sensor_GetVideoRes)(struct __ms_cus_sensor* handle, u32 res_idx, cus_camsensor_res **res);
+    /** @brief Get resolution list
+   @param[in] handle Handle to sensor driver.
+   @param[out] id Receive supported resolution list
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
+    int (*pCus_sensor_GetVideoRes)(struct __ms_cus_sensor* handle, u32 res_idx, cus_camsensor_res** res);
 
-     /** @brief Get resolution list
-    @param[in] handle Handle to sensor driver.
-    @param[out] id Receive supported resolution list
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
-    int (*pCus_sensor_GetCurVideoRes)(struct __ms_cus_sensor* handle, u32 *cur_idx, cus_camsensor_res **res);
+    /** @brief Get resolution list
+   @param[in] handle Handle to sensor driver.
+   @param[out] id Receive supported resolution list
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
+    int (*pCus_sensor_GetCurVideoRes)(struct __ms_cus_sensor* handle, u32* cur_idx, cus_camsensor_res** res);
 
-     /** @brief Select a sensor output resolution sensor list
-    @param[in] handle Handle to sensor driver.
-    @param[in] res_id Resolution id
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
+    /** @brief Select a sensor output resolution sensor list
+   @param[in] handle Handle to sensor driver.
+   @param[in] res_id Resolution id
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
     int (*pCus_sensor_SetVideoRes)(struct __ms_cus_sensor* handle, u32 res_id);
 
-     /** @brief Get sensor current mirror flip setting
-    @param[in] handle Handle to sensor driver.
-    @param[out] ori Receive Mirror/Flip setting.
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
-    int (*pCus_sensor_GetOrien)(struct __ms_cus_sensor* handle, CUS_CAMSENSOR_ORIT *ori);
+    /** @brief Get sensor current mirror flip setting
+   @param[in] handle Handle to sensor driver.
+   @param[out] ori Receive Mirror/Flip setting.
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
+    int (*pCus_sensor_GetOrien)(struct __ms_cus_sensor* handle, CUS_CAMSENSOR_ORIT* ori);
 
-     /** @brief Select a sensor mirror flip
-    @param[in] handle Handle to sensor driver.
-    @param[in] ori Mirror/Flip configuration.
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
+    /** @brief Select a sensor mirror flip
+   @param[in] handle Handle to sensor driver.
+   @param[in] ori Mirror/Flip configuration.
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
     int (*pCus_sensor_SetOrien)(struct __ms_cus_sensor* handle, CUS_CAMSENSOR_ORIT ori);
 
-     /** @brief Get sensor capability
-    @param[in] handle Handle to sensor driver.
-    @param[out] cap Receive sensor capability
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
-    int (*pCus_sensor_GetSensorCap)(struct __ms_cus_sensor* handle, CUS_CAMSENSOR_CAP *cap);
+    /** @brief Get sensor capability
+   @param[in] handle Handle to sensor driver.
+   @param[out] cap Receive sensor capability
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
+    int (*pCus_sensor_GetSensorCap)(struct __ms_cus_sensor* handle, CUS_CAMSENSOR_CAP* cap);
 
     ///////////////////////////////////////////////////////
     // AE
     ///////////////////////////////////////////////////////
     // unit: micro seconds
 
-     /** @brief AE/Frame status change notification
-    @param[in] handle Handle to sensor driver.
-    @param[in] status Current status
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
+    /** @brief AE/Frame status change notification
+   @param[in] handle Handle to sensor driver.
+   @param[in] status Current status
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
     int (*pCus_sensor_AEStatusNotify)(struct __ms_cus_sensor* handle, CUS_CAMSENSOR_AE_STATUS_NOTIFY status);
 
-     /** @brief Get sensor shutter setting in us
-    @param[in] handle Handle to sensor driver.
-    @param[out] us Receive current shutter setting
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
-    int (*pCus_sensor_GetAEUSecs)(struct __ms_cus_sensor* handle, u32 *us);
+    /** @brief Get sensor shutter setting in us
+   @param[in] handle Handle to sensor driver.
+   @param[out] us Receive current shutter setting
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
+    int (*pCus_sensor_GetAEUSecs)(struct __ms_cus_sensor* handle, u32* us);
 
-     /** @brief Set sensor shutter in us
-    @param[in] handle Handle to sensor driver.
-    @param[in] us Shutter setting in us
-    @retval Return SUCCESS or FAIL if error occurs.
-    */
+    /** @brief Set sensor shutter in us
+   @param[in] handle Handle to sensor driver.
+   @param[in] us Shutter setting in us
+   @retval Return SUCCESS or FAIL if error occurs.
+   */
     int (*pCus_sensor_SetAEUSecs)(struct __ms_cus_sensor* handle, u32 us);
 
     // Gain: 1x = 1024
@@ -938,7 +922,7 @@ typedef struct __ms_cus_sensor{
     @retval Return SUCCESS or FAIL if error occurs.
     @remark gain: 1x = 1024
     */
-    int (*pCus_sensor_GetAEMinMaxUSecs)(struct __ms_cus_sensor* handle, u32 *min, u32 *max);
+    int (*pCus_sensor_GetAEMinMaxUSecs)(struct __ms_cus_sensor* handle, u32* min, u32* max);
 
     /** @brief Get supported AE gain range
     @param[in] handle Handle to sensor driver.
@@ -947,7 +931,7 @@ typedef struct __ms_cus_sensor{
     @retval Return SUCCESS or FAIL if error occurs.
     @remark gain: 1x = 1024
     */
-    int (*pCus_sensor_GetAEMinMaxGain)(struct __ms_cus_sensor* handle, u32 *min, u32 *max);
+    int (*pCus_sensor_GetAEMinMaxGain)(struct __ms_cus_sensor* handle, u32* min, u32* max);
 
     // frame rate control
     /** @brief Get current fps
@@ -968,63 +952,63 @@ typedef struct __ms_cus_sensor{
     int (*pCus_sensor_SetAEGain_cal)(struct __ms_cus_sensor* handle, u32);
 
     /** @brief Optional function */
-    int (*pCus_sensor_setCaliData_gain_linearity)(struct __ms_cus_sensor* handle, CUS_GAIN_GAP_ARRAY* pArray ,u32 num);
+    int (*pCus_sensor_setCaliData_gain_linearity)(struct __ms_cus_sensor* handle, CUS_GAIN_GAP_ARRAY* pArray, u32 num);
 
-    //Get shutter information
+    // Get shutter information
     /** @brief Get shutter information
     @param[in] handle Handle to sensor driver.
     @param[out] info return shutter information.
     @retval Return current frame rate per second
     */
-    int (*pCus_sensor_GetShutterInfo)(struct __ms_cus_sensor* handle,CUS_SHUTTER_INFO *info);
+    int (*pCus_sensor_GetShutterInfo)(struct __ms_cus_sensor* handle, CUS_SHUTTER_INFO* info);
 
     /** @brief Get resolution list number
    @param[in] handle Handle to sensor driver.
    @param[out] ulres_num resolution list number
    @retval Return SUCCESS or FAIL if error occurs.
    */
-   int (*pCus_sensor_GetVideoResNum)(struct __ms_cus_sensor* handle, u32 *ulres_num);
+    int (*pCus_sensor_GetVideoResNum)(struct __ms_cus_sensor* handle, u32* ulres_num);
 
-   //Get shutter information
-   /** @brief Sensor vendor command
-   @param[in] handle Handle to sensor driver.
-   @param[in] reserved
-   @param[in] param Command input
-   @param[out] out Command output
-   @retval Return SUCCESS or FAIL if error occurs.
-   */
-   int (*pCus_sensor_CustDefineFunction)(struct __ms_cus_sensor* handle,u32 cmd_id, void *param);
+    // Get shutter information
+    /** @brief Sensor vendor command
+    @param[in] handle Handle to sensor driver.
+    @param[in] reserved
+    @param[in] param Command input
+    @param[out] out Command output
+    @retval Return SUCCESS or FAIL if error occurs.
+    */
+    int (*pCus_sensor_CustDefineFunction)(struct __ms_cus_sensor* handle, u32 cmd_id, void* param);
 
-   //Get Source Type
-   /** @brief Get Source Type
-   @param[in] handle Handle to sensor driver.
-   @param[in] plane id.
-   @param[out] psrc_type info
-   @retval Return SUCCESS or FAIL if error occurs.
-   */
-   int (*pCus_sensor_GetSrcType)(struct __ms_cus_sensor* handle, u32 plane_id, CUS_SNR_ANADEC_SRC_TYPE *psrc_type);
+    // Get Source Type
+    /** @brief Get Source Type
+    @param[in] handle Handle to sensor driver.
+    @param[in] plane id.
+    @param[out] psrc_type info
+    @retval Return SUCCESS or FAIL if error occurs.
+    */
+    int (*pCus_sensor_GetSrcType)(struct __ms_cus_sensor* handle, u32 plane_id, CUS_SNR_ANADEC_SRC_TYPE* psrc_type);
 
-   // Gain: 1x = 1024
-   /** @brief Try AE gain value
-   @param[in] handle Handle to sensor driver.
-   @param[in] Target AE gain value to try
-   @retval Return actual sensor gain will apply on the HW.
-   @remark gain: 1x = 1024
-   */
-   u32 (*pCus_sensor_TryAEGain)(struct __ms_cus_sensor* handle, u32 gain);
+    // Gain: 1x = 1024
+    /** @brief Try AE gain value
+    @param[in] handle Handle to sensor driver.
+    @param[in] Target AE gain value to try
+    @retval Return actual sensor gain will apply on the HW.
+    @remark gain: 1x = 1024
+    */
+    u32 (*pCus_sensor_TryAEGain)(struct __ms_cus_sensor* handle, u32 gain);
 
-   // Return actual shutter
-   /** @brief Try AE shutter value
-   @param[in] handle Handle to sensor driver.
-   @param[in] Target AE shutter value to try , in us
-   @retval Return actual sensor gain will apply on the HW.
-   @remark gain: 1x = 1024
-   */
-   u32 (*pCus_sensor_TryAEShutter)(struct __ms_cus_sensor* handle, u32 us);
+    // Return actual shutter
+    /** @brief Try AE shutter value
+    @param[in] handle Handle to sensor driver.
+    @param[in] Target AE shutter value to try , in us
+    @retval Return actual sensor gain will apply on the HW.
+    @remark gain: 1x = 1024
+    */
+    u32 (*pCus_sensor_TryAEShutter)(struct __ms_cus_sensor* handle, u32 us);
 
-   int (*pCus_sensor_SwitchgSensorId)(struct __ms_cus_sensor* handle,u32 sensorId);
- 
-   int (*pCus_sensor_GetCurSwtichSensorId)(struct __ms_cus_sensor* handle,u32 *pu32sensorId);
+    int (*pCus_sensor_SwitchgSensorId)(struct __ms_cus_sensor* handle, u32 sensorId);
+
+    int (*pCus_sensor_GetCurSwtichSensorId)(struct __ms_cus_sensor* handle, u32* pu32sensorId);
 } ms_cus_sensor;
 
 /** @brief Sensor driver entry. ISP call this function before start using sensor driver. \n

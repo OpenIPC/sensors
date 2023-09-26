@@ -16,8 +16,11 @@ rights to any and all damages, losses, costs and expenses resulting therefrom.
 #define DRV_SENSOR_H
 
 #include <cam_os_wrapper.h>
+#include <drv_ms_cus_sensor.h>
 
-#define SENSOR_DMSG(args...) do{}while(0)
+#define SENSOR_DMSG(args...) \
+    do {                     \
+    } while (0)
 #define SENSOR_EMSG(args...) CamOsPrintf(args)
 #define SENSOR_IMSG(args...) CamOsPrintf(args)
 #if 0
@@ -35,8 +38,8 @@ extern u64 intlog10(u32 value);
 extern u64 intlog2(u32 value);
 extern s32 DrvRegisterSensorDriver(u32 nCamID, SensorInitHandle pfnSensorInitHandle);
 extern s32 DrvRegisterPlaneDriver(u32 nCamID, u32 nPlaneID, SensorInitHandle pfnSensorInitHandle);
-extern s32 DrvRegisterSensorDriverEx(u32 nSNRPadID, SensorInitHandle pfnSensorInitHandle, void *pPrivateData);
-extern s32 DrvRegisterPlaneDriverEx(u32 nSNRPadID, u32 nPlaneID, SensorInitHandle pfnSensorInitHandle, void *pPrivateData);
+extern s32 DrvRegisterSensorDriverEx(u32 nSNRPadID, SensorInitHandle pfnSensorInitHandle, void* pPrivateData);
+extern s32 DrvRegisterPlaneDriverEx(u32 nSNRPadID, u32 nPlaneID, SensorInitHandle pfnSensorInitHandle, void* pPrivateData);
 extern s32 DrvSensorRelease(u32 nSNRPadID);
 extern s32 DrvSensorEarlyInitSync(u32 nSNRPadID);
 extern s32 DrvRegisterSensorI2CSlaveID(u32 nCamID, u32 Slaveid);
