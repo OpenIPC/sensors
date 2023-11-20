@@ -94,7 +94,7 @@ SENSOR_DRV_ENTRY_IMPL_BEGIN_EX(IMX347_HDR);
 ////////////////////////////////////
 // I2C Info                       //
 ////////////////////////////////////
-#define SENSOR_I2C_ADDR 0x6e // 0x34                //I2C slave address
+#define SENSOR_I2C_ADDR 0x34 //I2C slave address
 #define SENSOR_I2C_SPEED 300000 // 200000 //300000 //240000                  //I2C speed, 60000~320000
 //#define SENSOR_I2C_CHANNEL           1                 //I2C Channel
 //#define SENSOR_I2C_PAD_MODE          2                 //Pad/Mode Number
