@@ -135,6 +135,7 @@ static struct { // LINEAR
         LINEAR_RES_2,
         LINEAR_RES_3,
         LINEAR_RES_4,
+        LINEAR_RES_5,
         LINEAR_RES_END } mode;
     // Sensor Output Image info
     struct _senout {
@@ -150,9 +151,10 @@ static struct { // LINEAR
     } senstr;
 } imx415_mipi_linear[] = {
     { LINEAR_RES_1, { 3840, 2160, 3, 20 }, { 0, 0, 3840, 2160 }, { "3840x2160@20fps" } },
-    { LINEAR_RES_2, { 1920, 1080, 3, 60 }, { 0, 0, 1920, 1080 }, { "1920x1080@60fps" } },
-    { LINEAR_RES_3, { 1920, 1080, 3, 90 }, { 0, 0, 1920, 1080 }, { "1920x1080@90fps" } },
-    { LINEAR_RES_4, { 1284, 720, 3, 120 }, { 0, 0, 1280,  720 }, { "1280x720@120fps" } },
+    { LINEAR_RES_2, { 3200, 1800, 3, 30 }, { 0, 0, 3840, 2160 }, { "3200x1800@30fps" } },
+    { LINEAR_RES_3, { 1920, 1080, 3, 60 }, { 0, 0, 1920, 1080 }, { "1920x1080@60fps" } },
+    { LINEAR_RES_4, { 1920, 1080, 3, 90 }, { 0, 0, 1920, 1080 }, { "1920x1080@90fps" } },
+    { LINEAR_RES_5, { 1280, 720, 3, 120 }, { 0, 0, 1280,  720 }, { "1280x720@120fps" } },
 };
 
 static struct { // HDR
@@ -303,7 +305,7 @@ static int pCus_SetAEUSecsHDR_DOL_LEF(ms_cus_sensor* handle, u32 us);
 // 3840x2160@20fps
 const static I2C_ARRAY Sensor_8m_20fps_init_table_4lane_linear[] = {
     /*
-    IMX415-AAQR All-pixel scan CSI-2_4lane 27MHz AD:10bit Output:12bit 594Mbps Master Mode 19.996fps Integration Time 49.86ms
+    IMX415-AAQR All-pixel scan CSI-2_4lane 27MHz AD:10bit Output:12bit 594Mbps Master Mode 20fps Integration Time 49.86ms
     */
     { 0x3000, 0x01 }, // Standby
     { 0x3002, 0x01 }, // Master mode stop
@@ -406,6 +408,119 @@ const static I2C_ARRAY Sensor_8m_20fps_init_table_4lane_linear[] = {
     { 0x4024, 0x2F }, // THSTRAIL
     { 0x4026, 0x47 }, // THSEXIT
     { 0x4028, 0x27 }, // TLPX
+    { 0x4074, 0x01 }, // INCKSEL7
+    { 0xFFFF, 0x24 },
+    { 0x3002, 0x00 }, // Master mode start
+    { 0xFFFF, 0x10 },
+    { 0x3000, 0x00 }, // Operating
+};
+
+// 3840x2160@30fps
+const static I2C_ARRAY Sensor_8m_30fps_init_table_4lane_linear[] = {
+    /*
+    IMX415-AAQR All-pixel scan CSI-2_4lane 27MHz AD:10bit Output:12bit 891Mbps Master Mode 30fps Integration Time 33.31ms
+    */
+    { 0x3000, 0x01 }, // Standby
+    { 0x3002, 0x01 }, // Master mode stop
+    { 0x3008, 0x5D }, // BCWAIT_TIME[9:0]
+    { 0x300A, 0x42 }, // CPWAIT_TIME[9:0]
+    { 0x3024, 0xCA }, // VMAX (line number 0x8CA)
+    { 0x3025, 0x08 }, //
+    { 0x3028, 0xFE }, // HMAX (clock number 0x3FE)
+    { 0x3029, 0x03 }, //
+    { 0x3031, 0x00 }, // ADBIT (10bit)
+    { 0x3033, 0x05 }, // SYS_MODE (891Mbps)
+    { 0x3050, 0x08 }, // SHR0[19:0]
+    { 0x30C1, 0x00 }, // XVS_DRV[1:0]
+    { 0x3116, 0x23 }, // INCKSEL2
+    { 0x3118, 0xC6 }, // INCKSEL3
+    { 0x311A, 0xE7 }, // INCKSEL4
+    { 0x311E, 0x23 }, // INCKSEL5
+    { 0x32D4, 0x21 }, // -
+    { 0x32EC, 0xA1 }, // -
+    { 0x3452, 0x7F }, // -
+    { 0x3453, 0x03 }, // -
+    { 0x358A, 0x04 }, // -
+    { 0x35A1, 0x02 }, // -
+    { 0x36BC, 0x0C }, // -
+    { 0x36CC, 0x53 }, // -
+    { 0x36CD, 0x00 }, // -
+    { 0x36CE, 0x3C }, // -
+    { 0x36D0, 0x8C }, // -
+    { 0x36D1, 0x00 }, // -
+    { 0x36D2, 0x71 }, // -
+    { 0x36D4, 0x3C }, // -
+    { 0x36D6, 0x53 }, // -
+    { 0x36D7, 0x00 }, // -
+    { 0x36D8, 0x71 }, // -
+    { 0x36DA, 0x8C }, // -
+    { 0x36DB, 0x00 }, // -
+    { 0x3701, 0x00 }, // ADBIT1[7:0]
+    { 0x3724, 0x02 }, // -
+    { 0x3726, 0x02 }, // -
+    { 0x3732, 0x02 }, // -
+    { 0x3734, 0x03 }, // -
+    { 0x3736, 0x03 }, // -
+    { 0x3742, 0x03 }, // -
+    { 0x3862, 0xE0 }, // -
+    { 0x38CC, 0x30 }, // -
+    { 0x38CD, 0x2F }, // -
+    { 0x395C, 0x0C }, // -
+    { 0x3A42, 0xD1 }, // -
+    { 0x3A4C, 0x77 }, // -
+    { 0x3AE0, 0x02 }, // -
+    { 0x3AEC, 0x0C }, // -
+    { 0x3B00, 0x2E }, // -
+    { 0x3B06, 0x29 }, // -
+    { 0x3B98, 0x25 }, // -
+    { 0x3B99, 0x21 }, // -
+    { 0x3B9B, 0x13 }, // -
+    { 0x3B9C, 0x13 }, // -
+    { 0x3B9D, 0x13 }, // -
+    { 0x3B9E, 0x13 }, // -
+    { 0x3BA1, 0x00 }, // -
+    { 0x3BA2, 0x06 }, // -
+    { 0x3BA3, 0x0B }, // -
+    { 0x3BA4, 0x10 }, // -
+    { 0x3BA5, 0x14 }, // -
+    { 0x3BA6, 0x18 }, // -
+    { 0x3BA7, 0x1A }, // -
+    { 0x3BA8, 0x1A }, // -
+    { 0x3BA9, 0x1A }, // -
+    { 0x3BAC, 0xED }, // -
+    { 0x3BAD, 0x01 }, // -
+    { 0x3BAE, 0xF6 }, // -
+    { 0x3BAF, 0x02 }, // -
+    { 0x3BB0, 0xA2 }, // -
+    { 0x3BB1, 0x03 }, // -
+    { 0x3BB2, 0xE0 }, // -
+    { 0x3BB3, 0x03 }, // -
+    { 0x3BB4, 0xE0 }, // -
+    { 0x3BB5, 0x03 }, // -
+    { 0x3BB6, 0xE0 }, // -
+    { 0x3BB7, 0x03 }, // -
+    { 0x3BB8, 0xE0 }, // -
+    { 0x3BBA, 0xE0 }, // -
+    { 0x3BBC, 0xDA }, // -
+    { 0x3BBE, 0x88 }, // -
+    { 0x3BC0, 0x44 }, // -
+    { 0x3BC2, 0x7B }, // -
+    { 0x3BC4, 0xA2 }, // -
+    { 0x3BC8, 0xBD }, // -
+    { 0x3BCA, 0xBD }, // -
+    { 0x4004, 0xC0 }, // TXCLKESC_FREQ[15:0]
+    { 0x4005, 0x06 }, //
+    { 0x400C, 0x00 }, // INCKSEL6
+    { 0x4018, 0x7F }, // TCLKPOST
+    { 0x401A, 0x37 }, // TCLKPREPARE
+    { 0x401C, 0x37 }, // TCLKTRAIL
+    { 0x401E, 0xF7 }, // TCLKZERO
+    { 0x401F, 0x00 }, //
+    { 0x4020, 0x3F }, // THSPREPARE
+    { 0x4022, 0x6F }, // THSZERO
+    { 0x4024, 0x3F }, // THSTRAIL
+    { 0x4026, 0x5F }, // THSEXIT
+    { 0x4028, 0x2F }, // TLPX
     { 0x4074, 0x01 }, // INCKSEL7
     { 0xFFFF, 0x24 },
     { 0x3002, 0x00 }, // Master mode start
@@ -1935,6 +2050,35 @@ static int pCus_init_8m_20fps_mipi4lane_linear(ms_cus_sensor* handle)
     return SUCCESS;
 }
 
+static int pCus_init_8m_30fps_mipi4lane_linear(ms_cus_sensor* handle)
+{
+    // imx415_params *params = (imx415_params *)handle->private_data;
+    int i, cnt = 0;
+    // s16 sen_data;
+
+    if (pCus_CheckSensorProductID(handle) == FAIL) {
+        return FAIL;
+    }
+
+    for (i = 0; i < ARRAY_SIZE(Sensor_8m_30fps_init_table_4lane_linear); i++) {
+        if (Sensor_8m_30fps_init_table_4lane_linear[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_8m_30fps_init_table_4lane_linear[i].data);
+        } else {
+            cnt = 0;
+            while (SensorReg_Write(Sensor_8m_30fps_init_table_4lane_linear[i].reg, Sensor_8m_30fps_init_table_4lane_linear[i].data) != SUCCESS) {
+                cnt++;
+                if (cnt >= 10) {
+                    SENSOR_EMSG("[%s:%d]Sensor init fail!!\n", __FUNCTION__, __LINE__);
+                    return FAIL;
+                }
+                // SENSOR_UDELAY(1);
+            }
+        }
+    }
+
+    return SUCCESS;
+}
+
 static int pCus_init_2m_60fps_mipi4lane_linear(ms_cus_sensor* handle)
 {
     // imx415_params *params = (imx415_params *)handle->private_data;
@@ -2265,6 +2409,15 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         break;
     case 1:
         handle->video_res_supported.ulcur_res = 1;
+        handle->pCus_sensor_init = pCus_init_8m_30fps_mipi4lane_linear;
+        vts_30fps = 2250;
+        params->expo.vts = vts_30fps;
+        params->expo.fps = 30;
+        Preview_line_period = 14800; // 33.3ms/2250 = 14800ns;
+        handle->data_prec = CUS_DATAPRECISION_12;
+        break;
+    case 2:
+        handle->video_res_supported.ulcur_res = 2;
         handle->pCus_sensor_init = pCus_init_2m_60fps_mipi4lane_linear;
         vts_30fps = 2250;
         params->expo.vts = vts_30fps;
@@ -2272,8 +2425,8 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period = 7377; // 16.6ms/2250 = 7377ns;
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
-    case 2:
-        handle->video_res_supported.ulcur_res = 2;
+    case 3:
+        handle->video_res_supported.ulcur_res = 3;
         handle->pCus_sensor_init = pCus_init_2m_90fps_mipi4lane_linear;
         vts_30fps = 2250;
         params->expo.vts = vts_30fps;
@@ -2281,8 +2434,8 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period = 4933; // 11.1ms/2250 = 4933ns;
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
-    case 3:
-        handle->video_res_supported.ulcur_res = 3;
+    case 4:
+        handle->video_res_supported.ulcur_res = 4;
         handle->pCus_sensor_init = pCus_init_1m_120fps_mipi4lane_linear;
         vts_30fps = 1644;
         params->expo.vts = vts_30fps;

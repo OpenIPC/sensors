@@ -139,8 +139,8 @@ static struct { // LINEAR
         const char* strResDesc;
     } senstr;
 } imx335_mipi_linear[] = {
-    { LINEAR_RES_1, { 2592, 1944, 3, 25 }, { 0, 0, 2592, 1944 }, { "2592x1944@25fps" } },
-    { LINEAR_RES_2, { 2592, 1944, 3, 30 }, { 0, 0, 2592, 1944 }, { "2592x1944@30fps" } }, // Modify it
+    { LINEAR_RES_1, { 2560, 1920, 3, 25 }, { 0, 0, 2560, 1920 }, { "2560x1920@25fps" } },
+    { LINEAR_RES_2, { 2560, 1920, 3, 30 }, { 0, 0, 2560, 1920 }, { "2560x1920@30fps" } }, // Modify it
 };
 
 static struct { // HDR

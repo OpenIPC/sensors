@@ -131,8 +131,6 @@ int HDR_Ratio = 16;
 static struct { // LINEAR
     // Modify it based on number of support resolution
     enum { LINEAR_RES_1 = 0,
-        LINEAR_RES_2,
-        LINEAR_RES_3,
         LINEAR_RES_END } mode;
     // Sensor Output Image info
     struct _senout {
@@ -147,9 +145,7 @@ static struct { // LINEAR
         const char* strResDesc;
     } senstr;
 } imx347_mipi_linear[] = {
-    { LINEAR_RES_1, { 2712, 1536, 3, 30 }, { 12, 8, 2688, 1520 }, { "2688x1520@30fps" } },
-    { LINEAR_RES_2, { 2712, 1536, 3, 30 }, { 152, 48, 2560, 1440 }, { "2560x1440@30fps" } }, // Modify it
-    { LINEAR_RES_3, { 2712, 1536, 3, 30 }, { 396, 228, 1920, 1080 }, { "1920x1080@30fps" } }, // Modify it
+    { LINEAR_RES_1, { 2560, 1440, 3, 30 }, { 0, 0, 2560, 1440 }, { "2560x1440@30fps" } },
 };
 
 static struct { // HDR
@@ -937,30 +933,6 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
 
     switch (res_idx) {
     case 0:
-        handle->video_res_supported.ulcur_res = 0;
-        handle->pCus_sensor_init = pCus_init_mipi4lane_linear;
-        vts_30fps = 2666;
-        params->expo.vts = vts_30fps;
-        params->expo.fps = 30;
-        Preview_line_period = 12503;
-        break;
-    case 1:
-        handle->video_res_supported.ulcur_res = 1;
-        handle->pCus_sensor_init = pCus_init_mipi4lane_linear;
-        vts_30fps = 2666;
-        params->expo.vts = vts_30fps;
-        params->expo.fps = 30;
-        Preview_line_period = 12503;
-        break;
-    case 2:
-        handle->video_res_supported.ulcur_res = 2;
-        handle->pCus_sensor_init = pCus_init_mipi4lane_linear;
-        vts_30fps = 2666;
-        params->expo.vts = vts_30fps;
-        params->expo.fps = 30;
-        Preview_line_period = 12503;
-        break;
-    default:
         handle->video_res_supported.ulcur_res = 0;
         handle->pCus_sensor_init = pCus_init_mipi4lane_linear;
         vts_30fps = 2666;

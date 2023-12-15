@@ -2013,8 +2013,8 @@ int cus_camsensor_init_handle(ms_cus_sensor* drv_handle)
     handle->video_res_supported.res[0].min_fps = Preview_MIN_FPS;
     handle->video_res_supported.res[0].crop_start_x = Preview_CROP_START_X;
     handle->video_res_supported.res[0].crop_start_y = Preview_CROP_START_Y;
-    handle->video_res_supported.res[0].nOutputWidth = 0x79C;
-    handle->video_res_supported.res[0].nOutputHeight = 0x449;
+    handle->video_res_supported.res[0].nOutputWidth = 1920;
+    handle->video_res_supported.res[0].nOutputHeight = 1080;
     sprintf(handle->video_res_supported.res[0].strResDesc, "1920x1080@30fps");
     // i2c
     handle->i2c_cfg.mode = SENSOR_I2C_LEGACY; //(CUS_ISP_I2C_MODE) FALSE;
@@ -2135,8 +2135,8 @@ int cus_camsensor_init_handle_hdr_dol_sef1(ms_cus_sensor* drv_handle)
     handle->video_res_supported.res[0].min_fps = Preview_MIN_FPS;
     handle->video_res_supported.res[0].crop_start_x = Preview_CROP_START_X;
     handle->video_res_supported.res[0].crop_start_y = Preview_CROP_START_Y;
-    handle->video_res_supported.res[0].nOutputWidth = 0x79C;
-    handle->video_res_supported.res[0].nOutputHeight = 0x449;
+    handle->video_res_supported.res[0].nOutputWidth = 1920;
+    handle->video_res_supported.res[0].nOutputHeight = 1080;
     sprintf(handle->video_res_supported.res[0].strResDesc, "1920x1080@30fps_HDR");
 
     handle->pCus_sensor_SetVideoRes = pCus_SetVideoRes_HDR_DOL;
@@ -2420,8 +2420,8 @@ int cus_camsensor_init_handle_linear_isp_calibration(ms_cus_sensor* drv_handle)
     handle->video_res_supported.res[0].min_fps = Preview_MIN_FPS;
     handle->video_res_supported.res[0].crop_start_x = Preview_CROP_START_X;
     handle->video_res_supported.res[0].crop_start_y = Preview_CROP_START_Y;
-    handle->video_res_supported.res[0].nOutputWidth = 0x79C;
-    handle->video_res_supported.res[0].nOutputHeight = 0x449;
+    handle->video_res_supported.res[0].nOutputWidth = 1920;
+    handle->video_res_supported.res[0].nOutputHeight = 1080;
 
     // i2c
     handle->i2c_cfg.mode = SENSOR_I2C_LEGACY; //(CUS_ISP_I2C_MODE) FALSE;
@@ -2880,8 +2880,8 @@ static int cus_camsensor_init_handle_hdr_dol_lef(ms_cus_sensor* drv_handle)
     handle->video_res_supported.res[0].min_fps = Preview_MIN_FPS;
     handle->video_res_supported.res[0].crop_start_x = Preview_CROP_START_X;
     handle->video_res_supported.res[0].crop_start_y = Preview_CROP_START_Y;
-    handle->video_res_supported.res[0].nOutputWidth = 0x79C;
-    handle->video_res_supported.res[0].nOutputHeight = 0x449;
+    handle->video_res_supported.res[0].nOutputWidth = 1920;
+    handle->video_res_supported.res[0].nOutputHeight = 1080;
     sprintf(handle->video_res_supported.res[0].strResDesc, "1920x1080@30fps_HDR");
 
     // i2c
