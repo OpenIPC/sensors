@@ -351,10 +351,6 @@ I2C_ARRAY PatternTbl[] = {
     // pattern mode
 };
 
-I2C_ARRAY Current_Mirror_Flip_Tbl[] = {
-    { 0x17, 0x80 }, // bit[1:0]
-};
-
 /////////////////////////////////////////////////////////////////
 //       @@@@@@                                                                                    //
 //                 @@                                                                                    //
@@ -370,24 +366,8 @@ I2C_ARRAY Current_Mirror_Flip_Tbl[] = {
 //                                                                                                          //
 /////////////////////////////////////////////////////////////////
 
-static I2C_ARRAY mirr_flip_table[] = {
-#if 0
-     {0x17, 0x83},    // bit[1:0]
-
-     {0x17, 0x82},    // bit[1:0]
-
-     {0x17, 0x81},    // bit[1:0]
-
-     {0x17, 0x80},    // bit[1:0]
-#endif
-    { 0x17, 0x80 }, // bit[1:0]
-
-    { 0x17, 0x81 }, // bit[1:0]
-
-    { 0x17, 0x82 }, // bit[1:0]
-
-    { 0x17, 0x83 }, // bit[1:0]
-
+static I2C_ARRAY mirror_reg[] = {
+    { 0x17, 0x00 },
 };
 
 typedef struct {
@@ -735,73 +715,47 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
 
 static int pCus_GetOrien(ms_cus_sensor* handle, CUS_CAMSENSOR_ORIT* orit)
 {
-    short HFlip; //,VFlip;
-
-    SensorReg_Write(0xfe, 0x00); // page 0
-    SensorReg_Read(0x17, &HFlip);
-    //  SensorReg_Read(0x1d, &VFlip);
-
-    if (((HFlip & 0x03) == 0x03)) //&&((VFlip&0x80)==0))
+    char sen_data = mirror_reg[0].data;
+    switch (sen_data) {
+    case 0x00:
         *orit = CUS_ORIT_M0F0;
-    else if (((HFlip & 0x03) == 0x02)) //&&((VFlip&0x80)==0))
+        break;
+    case 0x01:
         *orit = CUS_ORIT_M1F0;
-    else if (((HFlip & 0x03) == 0x01)) //&&((VFlip&0x80)!=0))
+        break;
+    case 0x02:
         *orit = CUS_ORIT_M0F1;
-    else if (((HFlip & 0x03) == 0x00)) //&&((VFlip&0x80)!=0))
+        break;
+    case 0x03:
         *orit = CUS_ORIT_M1F1;
-
-    // SENSOR_DMSG("mirror:%x\r\n", HFlip&0x80);
-    // SENSOR_DMSG("Flip:%x\r\n", VFlip&0x80);
+        break;
+    }
 
     return SUCCESS;
 }
 
 static int pCus_SetOrien(ms_cus_sensor* handle, CUS_CAMSENSOR_ORIT orit)
 {
-    // gc2053_params *params = (gc2053_params *)handle->private_data;
-    SENSOR_DMSG("\n\n[%s]", __FUNCTION__);
-
+    gc2053_params* params = (gc2053_params*)handle->private_data;
     switch (orit) {
     case CUS_ORIT_M0F0:
-        SensorReg_Write(0xfe, 0x00); // page 0
-        SensorReg_Write(mirr_flip_table[0].reg, mirr_flip_table[0].data);
-        Current_Mirror_Flip_Tbl[0].reg = mirr_flip_table[0].reg;
-        Current_Mirror_Flip_Tbl[0].data = mirr_flip_table[0].data;
-        //  handle->bayer_id=  CUS_BAYER_BG;
+        mirror_reg[0].data = 0x00;
+        params->orient_dirty = true;
         break;
     case CUS_ORIT_M1F0:
-        SensorReg_Write(0xfe, 0x00); // page 0
-        SensorReg_Write(mirr_flip_table[1].reg, mirr_flip_table[1].data);
-        Current_Mirror_Flip_Tbl[0].reg = mirr_flip_table[1].reg;
-        Current_Mirror_Flip_Tbl[0].data = mirr_flip_table[1].data;
-        //  handle->bayer_id= CUS_BAYER_BG;
+        mirror_reg[0].data = 0x01;
+        params->orient_dirty = true;
         break;
     case CUS_ORIT_M0F1:
-        SensorReg_Write(0xfe, 0x00); // page 0
-        SensorReg_Write(mirr_flip_table[2].reg, mirr_flip_table[2].data);
-        Current_Mirror_Flip_Tbl[0].reg = mirr_flip_table[2].reg;
-        Current_Mirror_Flip_Tbl[0].data = mirr_flip_table[2].data;
-        // handle->bayer_id= CUS_BAYER_GR;
+        mirror_reg[0].data = 0x02;
+        params->orient_dirty = true;
         break;
     case CUS_ORIT_M1F1:
-        SensorReg_Write(0xfe, 0x00); // page 0
-        SensorReg_Write(mirr_flip_table[3].reg, mirr_flip_table[3].data);
-        Current_Mirror_Flip_Tbl[0].reg = mirr_flip_table[3].reg;
-        Current_Mirror_Flip_Tbl[0].data = mirr_flip_table[3].data;
-        // handle->bayer_id= CUS_BAYER_GR;
-        break;
-    default:
-        SensorReg_Write(0xfe, 0x00); // page 0
-        SensorReg_Write(mirr_flip_table[0].reg, mirr_flip_table[0].data);
-        Current_Mirror_Flip_Tbl[0].reg = mirr_flip_table[0].reg;
-        Current_Mirror_Flip_Tbl[0].data = mirr_flip_table[0].data;
-        //  handle->bayer_id= CUS_BAYER_BG;
+        mirror_reg[0].data = 0x03;
+        params->orient_dirty = true;
         break;
     }
-    // SensorReg_Write(0xef,0x01);
-    //   SensorReg_Write(0x09,1);
 
-    // params->orient_dirty = true;
     return SUCCESS;
 }
 
@@ -863,9 +817,13 @@ static int pCus_AEStatusNotify(ms_cus_sensor* handle, CUS_CAMSENSOR_AE_STATUS_NO
     gc2053_params* params = (gc2053_params*)handle->private_data;
     switch (status) {
     case CUS_FRAME_INACTIVE:
-
         break;
     case CUS_FRAME_ACTIVE:
+        if (params->orient_dirty) {
+            SensorReg_Write(0xfe, 0x00);
+            SensorRegArrayW((I2C_ARRAY*)mirror_reg, ARRAY_SIZE(mirror_reg));
+            params->orient_dirty = false;
+        }
         if (params->dirty) {
             SensorRegArrayW((I2C_ARRAY*)gain_reg, ARRAY_SIZE(gain_reg));
             SensorRegArrayW((I2C_ARRAY*)expo_reg, ARRAY_SIZE(expo_reg));
