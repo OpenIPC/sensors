@@ -69,7 +69,7 @@ SENSOR_DRV_ENTRY_IMPL_BEGIN_EX(IMX335_HDR);
 // Sensor-If Info                 //
 ////////////////////////////////////
 // MIPI config begin.
-#define SENSOR_MIPI_LANE_NUM (lane_num) // IMX335 Linear mode supports MIPI 2/4 Lane
+#define SENSOR_MIPI_LANE_NUM (4) // IMX335 Linear mode supports MIPI 2/4 Lane
 #define SENSOR_MIPI_LANE_NUM_DOL (4) //(hdr_lane_num)//IMX335 DOL mode supports MIPI 4 Lane
 //#define SENSOR_MIPI_HDR_MODE        (0) //0: Non-HDR mode. 1:Sony DOL mode
 
@@ -125,6 +125,9 @@ static struct { // LINEAR
     // Modify it based on number of support resolution
     enum { LINEAR_RES_1 = 0,
         LINEAR_RES_2,
+        LINEAR_RES_3,
+        LINEAR_RES_4,
+        LINEAR_RES_5,
         LINEAR_RES_END } mode;
     // Sensor Output Image info
     struct _senout {
@@ -139,8 +142,11 @@ static struct { // LINEAR
         const char* strResDesc;
     } senstr;
 } imx335_mipi_linear[] = {
-    { LINEAR_RES_1, { 2560, 1920, 3, 25 }, { 0, 0, 2560, 1920 }, { "2560x1920@25fps" } },
-    { LINEAR_RES_2, { 2560, 1920, 3, 30 }, { 0, 0, 2560, 1920 }, { "2560x1920@30fps" } }, // Modify it
+    { LINEAR_RES_1, { 2560, 1920, 3, 30 }, { 0, 0, 2560, 1920 }, { "2560x1920@30fps" } },
+    { LINEAR_RES_2, { 2560, 1440, 3, 60 }, { 0, 0, 2560, 1440 }, { "2560x1440@60fps" } },
+    { LINEAR_RES_3, { 2240, 1260, 3, 80 }, { 0, 0, 2560, 1440 }, { "2560x1440@80fps" } },
+    { LINEAR_RES_4, { 1920, 1080, 3, 100 }, { 0, 0, 2240, 1260 }, { "2240x1260@100fps" } },
+    { LINEAR_RES_5, { 1920, 1080, 3, 120 }, { 0, 0, 1920, 1080 }, { "1920x1080@120fps" } },
 };
 
 static struct { // HDR
@@ -273,337 +279,6 @@ const static I2C_ARRAY Sensor_id_table[] = {
     { 0x3033, 0x00 }
 };
 
-const static I2C_ARRAY Sensor_init_table_2lane_5m25fps[] = {
-    /*"IMX335LQN All-pixel scan CSI-2_2lane 1188Mbps AD:10bit Output:10bit 27MHz Master Mode 25fps"*/
-    { 0x3002, 0x01 }, // Master mode stop
-    { 0xffff, 0x14 }, // delay
-    { 0x3000, 0x01 }, // standby
-    { 0xffff, 0x14 }, // delay
-    { 0x300C, 0x42 }, // BCWAIT_TIME
-    { 0x300D, 0x2E }, // CPWAIT_TIME
-    { 0x3030, 0x56 }, // VMAX //101Dh: 4125 //1518h: 5400
-    { 0x3031, 0x13 }, // VMAX
-    { 0x3032, 0x00 }, // VMAX
-    { 0x3034, 0x58 }, // HMAX //2D0h: 720  //226h: 550
-    { 0x3035, 0x02 }, // HMAX
-    { 0x3050, 0x00 }, // ADBIT
-
-    { 0x305a, 0x00 }, // bit0-3(16-18)
-    { 0x3059, 0x0E }, // bit0-7(8-15)
-    { 0x3058, 0x80 }, // bit0-7
-
-    { 0x314C, 0xB0 }, // INCKSEL1
-    { 0x315A, 0x02 }, // INCKSEL2
-    { 0x3168, 0x8F }, // INCKSEL3
-    { 0x316A, 0x7E }, // INCKSEL4
-    { 0x319D, 0x00 }, // MDBIT 0:10Bit  1:12Bit
-    { 0x31A0, 0x2A }, // XH&VSOUTSEL
-    { 0x31A1, 0x00 }, // XVS/XHS pin setting
-    { 0x31A4, 0x00 }, // PULSE1_UP
-    { 0x31A5, 0x00 }, // PULSE1_UP
-    { 0x31A6, 0x00 }, // PULSE1_UP
-    { 0x31A8, 0x00 }, // PULSE1EN/PULSE1_POL
-    { 0x31AC, 0x00 }, // PULSE1_DN
-    { 0x31AD, 0x00 }, // PULSE1_DN
-    { 0x31AE, 0x00 }, // PULSE1_DN
-    { 0x31D4, 0x00 }, // XVSLNG
-    { 0x31D5, 0x00 }, // XHSLNG
-    { 0x31D7, 0x00 },
-    { 0x31E4, 0x01 },
-    { 0x31F3, 0x01 },
-    { 0x3288, 0x21 },
-    { 0x328A, 0x02 },
-    { 0x3414, 0x05 },
-    { 0x3416, 0x18 },
-    { 0x341C, 0xFF }, // ADBIT1 10Bit:0x01FF  12Bit:0x0047
-    { 0x341D, 0x01 }, // ADBIT1 10Bit:0x01FF  12Bit:0x0047
-    { 0x3648, 0x01 },
-    { 0x364A, 0x04 },
-    { 0x364C, 0x04 },
-    { 0x3678, 0x01 },
-    { 0x367C, 0x31 },
-    { 0x367E, 0x31 },
-    { 0x3706, 0x10 },
-    { 0x3708, 0x03 },
-    { 0x3714, 0x02 },
-    { 0x3715, 0x02 },
-    { 0x3716, 0x01 },
-    { 0x3717, 0x03 },
-    { 0x371C, 0x3D },
-    { 0x371D, 0x3F },
-    { 0x372C, 0x00 },
-    { 0x372D, 0x00 },
-    { 0x372E, 0x46 },
-    { 0x372F, 0x00 },
-    { 0x3730, 0x89 },
-    { 0x3731, 0x00 },
-    { 0x3732, 0x08 },
-    { 0x3733, 0x01 },
-    { 0x3734, 0xFE },
-    { 0x3735, 0x05 },
-    { 0x3740, 0x02 },
-    { 0x375D, 0x00 },
-    { 0x375E, 0x00 },
-    { 0x375F, 0x11 },
-    { 0x3760, 0x01 },
-    { 0x3768, 0x1B },
-    { 0x3769, 0x1B },
-    { 0x376A, 0x1B },
-    { 0x376B, 0x1B },
-    { 0x376C, 0x1A },
-    { 0x376D, 0x17 },
-    { 0x376E, 0x0F },
-    { 0x3776, 0x00 },
-    { 0x3777, 0x00 },
-    { 0x3778, 0x46 },
-    { 0x3779, 0x00 },
-    { 0x377A, 0x89 },
-    { 0x377B, 0x00 },
-    { 0x377C, 0x08 },
-    { 0x377D, 0x01 },
-    { 0x377E, 0x23 },
-    { 0x377F, 0x02 },
-    { 0x3780, 0xD9 },
-    { 0x3781, 0x03 },
-    { 0x3782, 0xF5 },
-    { 0x3783, 0x06 },
-    { 0x3784, 0xA5 },
-    { 0x3788, 0x0F },
-    { 0x378A, 0xD9 },
-    { 0x378B, 0x03 },
-    { 0x378C, 0xEB },
-    { 0x378D, 0x05 },
-    { 0x378E, 0x87 },
-    { 0x378F, 0x06 },
-    { 0x3790, 0xF5 },
-    { 0x3792, 0x43 },
-    { 0x3794, 0x7A },
-    { 0x3796, 0xA1 },
-    { 0x3A01, 0x01 }, // LANEMODE 0x03:4Lane  0x01:2Lane
-    { 0x3000, 0x00 },
-    { 0x3002, 0x00 },
-};
-
-const static I2C_ARRAY Sensor_init_table_2lane_5m30fps[] = {
-    /*"IMX335LQN All-pixel scan CSI-2_2lane 1188Mbps AD:10bit Output:10bit 27MHz Master Mode 30fps"*/
-    { 0x3002, 0x01 }, // Master mode stop
-    { 0xffff, 0x14 }, // delay
-    { 0x3000, 0x01 }, // standby
-    { 0xffff, 0x14 }, // delay
-    { 0x300C, 0x42 }, // BCWAIT_TIME
-    { 0x300D, 0x2E }, // CPWAIT_TIME
-    { 0x3030, 0x1D }, // VMAX //1194 :4500 //101D: 4125
-    { 0x3031, 0x10 }, // VMAX
-    { 0x3032, 0x00 }, // VMAX
-    { 0x3034, 0x58 }, // HMAX //2D0h: 720  //226h: 550
-    { 0x3035, 0x02 }, // HMAX
-    { 0x3050, 0x00 }, // ADBIT
-
-    { 0x305a, 0x00 }, // bit0-3(16-18)
-    { 0x3059, 0x0E }, // bit0-7(8-15)
-    { 0x3058, 0x80 }, // bit0-7
-
-    { 0x314C, 0xB0 }, // INCKSEL1
-    { 0x315A, 0x02 }, // INCKSEL2
-    { 0x3168, 0x8F }, // INCKSEL3
-    { 0x316A, 0x7E }, // INCKSEL4
-    { 0x319D, 0x00 }, // MDBIT 0:10Bit  1:12Bit
-    { 0x31A0, 0x2A }, // XH&VSOUTSEL
-    { 0x31A1, 0x00 }, // XVS/XHS pin setting
-    { 0x31A4, 0x00 }, // PULSE1_UP
-    { 0x31A5, 0x00 }, // PULSE1_UP
-    { 0x31A6, 0x00 }, // PULSE1_UP
-    { 0x31A8, 0x00 }, // PULSE1EN/PULSE1_POL
-    { 0x31AC, 0x00 }, // PULSE1_DN
-    { 0x31AD, 0x00 }, // PULSE1_DN
-    { 0x31AE, 0x00 }, // PULSE1_DN
-    { 0x31D4, 0x00 }, // XVSLNG
-    { 0x31D5, 0x00 }, // XHSLNG
-    { 0x31D7, 0x00 },
-    { 0x31E4, 0x01 },
-    { 0x31F3, 0x01 },
-    { 0x3288, 0x21 },
-    { 0x328A, 0x02 },
-    { 0x3414, 0x05 },
-    { 0x3416, 0x18 },
-    { 0x341C, 0xFF }, // ADBIT1 10Bit:0x01FF  12Bit:0x0047
-    { 0x341D, 0x01 }, // ADBIT1 10Bit:0x01FF  12Bit:0x0047
-    { 0x3648, 0x01 },
-    { 0x364A, 0x04 },
-    { 0x364C, 0x04 },
-    { 0x3678, 0x01 },
-    { 0x367C, 0x31 },
-    { 0x367E, 0x31 },
-    { 0x3706, 0x10 },
-    { 0x3708, 0x03 },
-    { 0x3714, 0x02 },
-    { 0x3715, 0x02 },
-    { 0x3716, 0x01 },
-    { 0x3717, 0x03 },
-    { 0x371C, 0x3D },
-    { 0x371D, 0x3F },
-    { 0x372C, 0x00 },
-    { 0x372D, 0x00 },
-    { 0x372E, 0x46 },
-    { 0x372F, 0x00 },
-    { 0x3730, 0x89 },
-    { 0x3731, 0x00 },
-    { 0x3732, 0x08 },
-    { 0x3733, 0x01 },
-    { 0x3734, 0xFE },
-    { 0x3735, 0x05 },
-    { 0x3740, 0x02 },
-    { 0x375D, 0x00 },
-    { 0x375E, 0x00 },
-    { 0x375F, 0x11 },
-    { 0x3760, 0x01 },
-    { 0x3768, 0x1B },
-    { 0x3769, 0x1B },
-    { 0x376A, 0x1B },
-    { 0x376B, 0x1B },
-    { 0x376C, 0x1A },
-    { 0x376D, 0x17 },
-    { 0x376E, 0x0F },
-    { 0x3776, 0x00 },
-    { 0x3777, 0x00 },
-    { 0x3778, 0x46 },
-    { 0x3779, 0x00 },
-    { 0x377A, 0x89 },
-    { 0x377B, 0x00 },
-    { 0x377C, 0x08 },
-    { 0x377D, 0x01 },
-    { 0x377E, 0x23 },
-    { 0x377F, 0x02 },
-    { 0x3780, 0xD9 },
-    { 0x3781, 0x03 },
-    { 0x3782, 0xF5 },
-    { 0x3783, 0x06 },
-    { 0x3784, 0xA5 },
-    { 0x3788, 0x0F },
-    { 0x378A, 0xD9 },
-    { 0x378B, 0x03 },
-    { 0x378C, 0xEB },
-    { 0x378D, 0x05 },
-    { 0x378E, 0x87 },
-    { 0x378F, 0x06 },
-    { 0x3790, 0xF5 },
-    { 0x3792, 0x43 },
-    { 0x3794, 0x7A },
-    { 0x3796, 0xA1 },
-    { 0x3A01, 0x01 }, // LANEMODE 0x03:4Lane  0x01:2Lane
-    { 0x3000, 0x00 },
-    { 0x3002, 0x00 },
-};
-
-const static I2C_ARRAY Sensor_init_table_4lane_5m25fps[] = {
-    /* "IMX335LQN All-pixel scan CSI-2_4lane 1188Mbps AD:10bit Output:10bit 27MHz Master Mode 25fps" */
-    { 0x3002, 0x01 }, // Master mode stop
-    { 0xffff, 0x14 }, // delay
-    { 0x3000, 0x01 }, // standby
-    { 0xffff, 0x14 }, // delay
-    { 0x300C, 0x42 },
-    { 0x300D, 0x2E },
-    { 0x3030, 0x56 }, // VMAX //101Dh: 4125 //1518h: 5400
-    { 0x3031, 0x13 }, // VMAX
-    { 0x3032, 0x00 }, // VMAX
-    { 0x3034, 0x58 }, // HMAX //2D0h: 720  //226h: 550
-    { 0x3035, 0x02 }, // HMAX
-
-    { 0x305a, 0x00 }, // bit0-3(16-18)
-    { 0x3059, 0x0E }, // bit0-7(8-15)
-    { 0x3058, 0x80 }, // bit0-7
-
-    { 0x314C, 0xB0 },
-    { 0x315A, 0x02 },
-    { 0x3168, 0x8F },
-    { 0x316A, 0x7E },
-    { 0x319D, 0x00 }, // MDBIT 0:10Bit  1:12Bit
-    { 0x31A0, 0x2A },
-    { 0x31A1, 0x00 },
-    { 0x31A4, 0x00 },
-    { 0x31A5, 0x00 },
-    { 0x31A6, 0x00 },
-    { 0x31A8, 0x00 },
-    { 0x31AC, 0x00 },
-    { 0x31AD, 0x00 },
-    { 0x31AE, 0x00 },
-    { 0x31D4, 0x00 },
-    { 0x31D5, 0x00 },
-    { 0x31D7, 0x00 },
-    { 0x31E4, 0x01 },
-    { 0x31F3, 0x01 },
-    { 0x3288, 0x21 },
-    { 0x328A, 0x02 },
-    { 0x3414, 0x05 },
-    { 0x3416, 0x18 },
-    { 0x341c, 0xFF }, // 0x47--12-bit   0xff--10bit
-    { 0x341d, 0x01 }, // 0x00--12-bit   0x01--10bit
-    { 0x3648, 0x01 },
-    { 0x364A, 0x04 },
-    { 0x364C, 0x04 },
-    { 0x3678, 0x01 },
-    { 0x367C, 0x31 },
-    { 0x367E, 0x31 },
-    { 0x3706, 0x10 },
-    { 0x3708, 0x03 },
-    { 0x3714, 0x02 },
-    { 0x3715, 0x02 },
-    { 0x3716, 0x01 },
-    { 0x3717, 0x03 },
-    { 0x371C, 0x3D },
-    { 0x371D, 0x3F },
-    { 0x372C, 0x00 },
-    { 0x372D, 0x00 },
-    { 0x372E, 0x46 },
-    { 0x372F, 0x00 },
-    { 0x3730, 0x89 },
-    { 0x3731, 0x00 },
-    { 0x3732, 0x08 },
-    { 0x3733, 0x01 },
-    { 0x3734, 0xFE },
-    { 0x3735, 0x05 },
-    { 0x3740, 0x02 },
-    { 0x375D, 0x00 },
-    { 0x375E, 0x00 },
-    { 0x375F, 0x11 },
-    { 0x3760, 0x01 },
-    { 0x3768, 0x1B },
-    { 0x3769, 0x1B },
-    { 0x376A, 0x1B },
-    { 0x376B, 0x1B },
-    { 0x376C, 0x1A },
-    { 0x376D, 0x17 },
-    { 0x376E, 0x0F },
-    { 0x3776, 0x00 },
-    { 0x3777, 0x00 },
-    { 0x3778, 0x46 },
-    { 0x3779, 0x00 },
-    { 0x377A, 0x89 },
-    { 0x377B, 0x00 },
-    { 0x377C, 0x08 },
-    { 0x377D, 0x01 },
-    { 0x377E, 0x23 },
-    { 0x377F, 0x02 },
-    { 0x3780, 0xD9 },
-    { 0x3781, 0x03 },
-    { 0x3782, 0xF5 },
-    { 0x3783, 0x06 },
-    { 0x3784, 0xA5 },
-    { 0x3788, 0x0F },
-    { 0x378A, 0xD9 },
-    { 0x378B, 0x03 },
-    { 0x378C, 0xEB },
-    { 0x378D, 0x05 },
-    { 0x378E, 0x87 },
-    { 0x378F, 0x06 },
-    { 0x3790, 0xF5 },
-    { 0x3792, 0x43 },
-    { 0x3794, 0x7A },
-    { 0x3796, 0xA1 },
-    { 0x3000, 0x00 },
-    { 0x3002, 0x00 },
-};
-
 const static I2C_ARRAY Sensor_init_table_4lane_5m30fps[] = {
     /* "IMX335LQN All-pixel scan CSI-2_4lane 1188Mbps AD:10bit Output:10bit 27MHz Master Mode 30fps" */
     { 0x3002, 0x01 }, // Master mode stop
@@ -612,21 +287,19 @@ const static I2C_ARRAY Sensor_init_table_4lane_5m30fps[] = {
     { 0xffff, 0x14 }, // delay
     { 0x300C, 0x42 },
     { 0x300D, 0x2E },
-    { 0x3030, 0x1D }, // VMAX //1194 :4500 //101D: 4125
+    { 0x3030, 0x1D }, // VMAX //1194: 4500 //101D: 4125
     { 0x3031, 0x10 }, // VMAX
     { 0x3032, 0x00 }, // VMAX
-    { 0x3034, 0x58 }, // HMAX //2D0h: 720  //226h: 550
+    { 0x3034, 0x58 }, // HMAX //2D0h: 720 //226h: 550
     { 0x3035, 0x02 }, // HMAX
-
-    { 0x305a, 0x00 }, // bit0-3(16-18)
-    { 0x3059, 0x0E }, // bit0-7(8-15)
+    { 0x305a, 0x00 }, // bit0-3 (16-18)
+    { 0x3059, 0x0E }, // bit0-7 (8-15)
     { 0x3058, 0x80 }, // bit0-7
-
     { 0x314C, 0xB0 },
     { 0x315A, 0x02 },
     { 0x3168, 0x8F },
     { 0x316A, 0x7E },
-    { 0x319D, 0x00 }, // MDBIT 0:10Bit  1:12Bit
+    { 0x319D, 0x00 }, // MDBIT 0:10Bit, 1:12Bit
     { 0x31A0, 0x2A },
     { 0x31A1, 0x00 },
     { 0x31A4, 0x00 },
@@ -645,8 +318,8 @@ const static I2C_ARRAY Sensor_init_table_4lane_5m30fps[] = {
     { 0x328A, 0x02 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341c, 0xFF }, // 0x47--12-bit   0xff--10bit
-    { 0x341d, 0x01 }, // 0x00--12-bit   0x01--10bit
+    { 0x341c, 0xFF }, // 0x47--12-bit, 0xff--10bit
+    { 0x341d, 0x01 }, // 0x00--12-bit, 0x01--10bit
     { 0x3648, 0x01 },
     { 0x364A, 0x04 },
     { 0x364C, 0x04 },
@@ -709,6 +382,486 @@ const static I2C_ARRAY Sensor_init_table_4lane_5m30fps[] = {
     { 0x3792, 0x43 },
     { 0x3794, 0x7A },
     { 0x3796, 0xA1 },
+    { 0x3000, 0x00 },
+    { 0x3002, 0x00 },
+};
+
+const static I2C_ARRAY Sensor_init_table_4lane_5m60fps[] = {
+    /* "IMX335LQN All-pixel scan CSI-2_4lane 891Mbps AD:10bit Output:10bit 27MHz Master Mode 60fps" */
+    { 0x3002, 0x01 }, // Master mode stop
+    { 0xffff, 0x14 }, // delay
+    { 0x3000, 0x01 }, // standby
+    { 0xffff, 0x14 }, // delay
+    { 0x300C, 0x42 },
+    { 0x300D, 0x2E },
+    { 0x3018, 0x04 }, // window mode
+    { 0x302C, 0x30 }, // HTRIMMING Horiz Start
+    { 0x302D, 0x00 },
+    { 0x302E, 0x18 }, // HNUM Horiz size
+    { 0x302F, 0x0A },
+    { 0x3030, 0xC8 }, // VMAX
+    { 0x3031, 0x0B },
+    { 0x3032, 0x00 },
+    { 0x3034, 0x90 }, // HMAX
+    { 0x3035, 0x01 },
+    { 0x3056, 0xB4 }, // Y_OUT_SIZE
+    { 0x3057, 0x05 },
+    { 0x3074, 0xA8 }, // AREA3_ST_Addr Upper left cropping postion
+    { 0x3075, 0x02 },
+    { 0x3076, 0x68 }, // AREA3_WIDTH_1 Vert Cropping Size designation * 2, = Y_OUT_SIZE * 2
+    { 0x3077, 0x0B },
+    { 0x3050, 0x00 },
+    { 0x30C6, 0x00 }, // Black Offset Addr
+    { 0x30CE, 0x00 }, // UNRD_Line_Max
+    { 0x30D8, 0xE0 }, // UNREAD_ED_ADR
+    { 0x30D9, 0x0E },
+    { 0x314C, 0x08 },
+    { 0x314D, 0x01 },
+    { 0x315A, 0x06 },
+    { 0x3168, 0x8F },
+    { 0x316A, 0x7E },
+    { 0x319D, 0x00 }, // 00: 10bit | 01: 12bit
+    { 0x319E, 0x02 }, // SYS_MODE = 891Mbps
+    { 0x31A1, 0x00 },
+    { 0x3288, 0x21 },
+    { 0x328A, 0x02 },
+    { 0x3414, 0x05 },
+    { 0x3416, 0x18 },
+    { 0x341C, 0xFF }, // Input AD bit
+    { 0x341D, 0x01 },
+    { 0x3648, 0x01 },
+    { 0x364A, 0x04 },
+    { 0x364C, 0x04 },
+    { 0x3678, 0x01 },
+    { 0x367C, 0x31 },
+    { 0x367E, 0x31 },
+    { 0x3706, 0x10 },
+    { 0x3708, 0x03 },
+    { 0x3714, 0x02 },
+    { 0x3715, 0x02 },
+    { 0x3716, 0x01 },
+    { 0x3717, 0x03 },
+    { 0x371C, 0x3D },
+    { 0x371D, 0x3F },
+    { 0x372C, 0x00 },
+    { 0x372D, 0x00 },
+    { 0x372E, 0x46 },
+    { 0x372F, 0x00 },
+    { 0x3730, 0x89 },
+    { 0x3731, 0x00 },
+    { 0x3732, 0x08 },
+    { 0x3733, 0x01 },
+    { 0x3734, 0xFE },
+    { 0x3735, 0x05 },
+    { 0x3740, 0x02 },
+    { 0x375D, 0x00 },
+    { 0x375E, 0x00 },
+    { 0x375F, 0x11 },
+    { 0x3760, 0x01 },
+    { 0x3768, 0x1B },
+    { 0x3769, 0x1B },
+    { 0x376A, 0x1B },
+    { 0x376B, 0x1B },
+    { 0x376C, 0x1A },
+    { 0x376D, 0x17 },
+    { 0x376E, 0x0F },
+    { 0x3776, 0x00 },
+    { 0x3777, 0x00 },
+    { 0x3778, 0x46 },
+    { 0x3779, 0x00 },
+    { 0x377A, 0x89 },
+    { 0x377B, 0x00 },
+    { 0x377C, 0x08 },
+    { 0x377D, 0x01 },
+    { 0x377E, 0x23 },
+    { 0x377F, 0x02 },
+    { 0x3780, 0xD9 },
+    { 0x3781, 0x03 },
+    { 0x3782, 0xF5 },
+    { 0x3783, 0x06 },
+    { 0x3784, 0xA5 },
+    { 0x3788, 0x0F },
+    { 0x378A, 0xD9 },
+    { 0x378B, 0x03 },
+    { 0x378C, 0xEB },
+    { 0x378D, 0x05 },
+    { 0x378E, 0x87 },
+    { 0x378F, 0x06 },
+    { 0x3790, 0xF5 },
+    { 0x3792, 0x43 },
+    { 0x3794, 0x7A },
+    { 0x3796, 0xA1 },
+    { 0x3A18, 0x7F },
+    { 0x3A1A, 0x37 },
+    { 0x3A1C, 0x37 },
+    { 0x3A1E, 0xF7 },
+    { 0x3A1F, 0x00 },
+    { 0x3A20, 0x3F },
+    { 0x3A22, 0x6F },
+    { 0x3A24, 0x3F },
+    { 0x3A26, 0x5F },
+    { 0x3A28, 0x2F },
+    { 0x3000, 0x00 },
+    { 0x3002, 0x00 },
+};
+
+const static I2C_ARRAY Sensor_init_table_4lane_5m80fps[] = {
+    /* "IMX335LQN All-pixel scan CSI-2_4lane 891Mbps AD:10bit Output:10bit 27MHz Master Mode 80fps" */
+    { 0x3002, 0x01 }, // Master mode stop
+    { 0xffff, 0x14 }, // delay
+    { 0x3000, 0x01 }, // standby
+    { 0xffff, 0x14 }, // delay
+    { 0x300C, 0x42 },
+    { 0x300D, 0x2E },
+    { 0x3018, 0x04 }, // window mode
+    { 0x302C, 0x30 }, // HTRIMMING Horiz Start in cropping
+    { 0x302D, 0x00 },
+    { 0x302E, 0x18 }, // HNUM
+    { 0x302F, 0x0A },
+    { 0x3030, 0xC8 }, // VMAX
+    { 0x3031, 0x0B },
+    { 0x3032, 0x00 },
+    { 0x3034, 0x32 }, // HMAX
+    { 0x3035, 0x01 },
+    { 0x3056, 0xB4 }, // Y_OUT_SIZE effective pixel lines
+    { 0x3057, 0x05 },
+    { 0x3074, 0xA8 }, // AREA3_ST_Addr Upper left cropping postion
+    { 0x3075, 0x02 },
+    { 0x3076, 0x68 }, // AREA3_WIDTH_1 Vert Cropping Size designation * 2, = Y_OUT_SIZE * 2
+    { 0x3077, 0x0B },
+    { 0x3050, 0x00 },
+    { 0x30C6, 0x00 }, // Black Offset Addr 12h
+    { 0x30CE, 0x00 }, // UNRD_Line_Max in cropping
+    { 0x30D8, 0xE0 }, // UNREAD_ED_ADR in cropping
+    { 0x30D9, 0x0E },
+    { 0x314C, 0x08 },
+    { 0x314D, 0x01 },
+    { 0x315A, 0x06 },
+    { 0x3168, 0x8F },
+    { 0x316A, 0x7E },
+    { 0x319D, 0x00 }, // 00: 10bit | 01: 12bit
+    { 0x319E, 0x02 }, // SYS_MODE = 891Mbps
+    { 0x31A1, 0x00 },
+    { 0x3288, 0x21 },
+    { 0x328A, 0x02 },
+    { 0x3414, 0x05 },
+    { 0x3416, 0x18 },
+    { 0x341C, 0xFF }, // Input AD bit
+    { 0x341D, 0x01 },
+    { 0x3648, 0x01 },
+    { 0x364A, 0x04 },
+    { 0x364C, 0x04 },
+    { 0x3678, 0x01 },
+    { 0x367C, 0x31 },
+    { 0x367E, 0x31 },
+    { 0x3706, 0x10 },
+    { 0x3708, 0x03 },
+    { 0x3714, 0x02 },
+    { 0x3715, 0x02 },
+    { 0x3716, 0x01 },
+    { 0x3717, 0x03 },
+    { 0x371C, 0x3D },
+    { 0x371D, 0x3F },
+    { 0x372C, 0x00 },
+    { 0x372D, 0x00 },
+    { 0x372E, 0x46 },
+    { 0x372F, 0x00 },
+    { 0x3730, 0x89 },
+    { 0x3731, 0x00 },
+    { 0x3732, 0x08 },
+    { 0x3733, 0x01 },
+    { 0x3734, 0xFE },
+    { 0x3735, 0x05 },
+    { 0x3740, 0x02 },
+    { 0x375D, 0x00 },
+    { 0x375E, 0x00 },
+    { 0x375F, 0x11 },
+    { 0x3760, 0x01 },
+    { 0x3768, 0x1B },
+    { 0x3769, 0x1B },
+    { 0x376A, 0x1B },
+    { 0x376B, 0x1B },
+    { 0x376C, 0x1A },
+    { 0x376D, 0x17 },
+    { 0x376E, 0x0F },
+    { 0x3776, 0x00 },
+    { 0x3777, 0x00 },
+    { 0x3778, 0x46 },
+    { 0x3779, 0x00 },
+    { 0x377A, 0x89 },
+    { 0x377B, 0x00 },
+    { 0x377C, 0x08 },
+    { 0x377D, 0x01 },
+    { 0x377E, 0x23 },
+    { 0x377F, 0x02 },
+    { 0x3780, 0xD9 },
+    { 0x3781, 0x03 },
+    { 0x3782, 0xF5 },
+    { 0x3783, 0x06 },
+    { 0x3784, 0xA5 },
+    { 0x3788, 0x0F },
+    { 0x378A, 0xD9 },
+    { 0x378B, 0x03 },
+    { 0x378C, 0xEB },
+    { 0x378D, 0x05 },
+    { 0x378E, 0x87 },
+    { 0x378F, 0x06 },
+    { 0x3790, 0xF5 },
+    { 0x3792, 0x43 },
+    { 0x3794, 0x7A },
+    { 0x3796, 0xA1 },
+    { 0x3A18, 0x7F },
+    { 0x3A1A, 0x37 },
+    { 0x3A1C, 0x37 },
+    { 0x3A1E, 0xF7 },
+    { 0x3A1F, 0x00 },
+    { 0x3A20, 0x3F },
+    { 0x3A22, 0x6F },
+    { 0x3A24, 0x3F },
+    { 0x3A26, 0x5F },
+    { 0x3A28, 0x2F },
+    { 0x3000, 0x00 },
+    { 0x3002, 0x00 },
+};
+
+const static I2C_ARRAY Sensor_init_table_4lane_5m100fps[] = {
+    /* "IMX335LQN All-pixel scan CSI-2_4lane 891Mbps AD:10bit Output:10bit 27MHz Master Mode 100fps" */
+    { 0x3002, 0x01 }, // Master mode stop
+    { 0xffff, 0x14 }, // delay
+    { 0x3000, 0x01 }, // standby
+    { 0xffff, 0x14 }, // delay
+    { 0x300C, 0x42 },
+    { 0x300D, 0x2E },
+    { 0x3018, 0x04 }, // window mode
+    { 0x302C, 0xE4 }, // HTRIMMING Horiz Start
+    { 0x302D, 0x00 },
+    { 0x302E, 0xD0 }, // HNUM Horiz size
+    { 0x302F, 0x08 },
+    { 0x3030, 0x80 }, // VMAX
+    { 0x3031, 0x0A },
+    { 0x3032, 0x00 },
+    { 0x3034, 0x13 }, // HMAX
+    { 0x3035, 0x01 },
+    { 0x3056, 0xFC }, // Y_OUT_SIZE
+    { 0x3057, 0x04 },
+    { 0x3072, 0x28 }, // Vert Crop start
+    { 0x3073, 0x00 },
+    { 0x3074, 0x60 }, // AREA3_ST_Addr
+    { 0x3075, 0x03 },
+    { 0x3076, 0xF8 }, // AREA3_WIDTH_1
+    { 0x3077, 0x09 },
+    { 0x3050, 0x00 },
+    { 0x30C6, 0x12 }, // Black Offset Addr 12h
+    { 0x30CE, 0x64 }, // UNRD_Line_Max
+    { 0x30D8, 0x28 }, // UNREAD_ED_ADR
+    { 0x30D9, 0x0E },
+    { 0x314C, 0x08 },
+    { 0x314D, 0x01 },
+    { 0x315A, 0x06 },
+    { 0x3168, 0x8F },
+    { 0x316A, 0x7E },
+    { 0x319D, 0x00 }, // 00: 10bit | 01: 12bit
+    { 0x319E, 0x02 }, // SYS_MODE = 891Mbps
+    { 0x31A1, 0x00 },
+    { 0x3288, 0x21 },
+    { 0x328A, 0x02 },
+    { 0x3414, 0x05 },
+    { 0x3416, 0x18 },
+    { 0x341C, 0xFF }, // Input AD bit
+    { 0x341D, 0x01 },
+    { 0x3648, 0x01 },
+    { 0x364A, 0x04 },
+    { 0x364C, 0x04 },
+    { 0x3678, 0x01 },
+    { 0x367C, 0x31 },
+    { 0x367E, 0x31 },
+    { 0x3706, 0x10 },
+    { 0x3708, 0x03 },
+    { 0x3714, 0x02 },
+    { 0x3715, 0x02 },
+    { 0x3716, 0x01 },
+    { 0x3717, 0x03 },
+    { 0x371C, 0x3D },
+    { 0x371D, 0x3F },
+    { 0x372C, 0x00 },
+    { 0x372D, 0x00 },
+    { 0x372E, 0x46 },
+    { 0x372F, 0x00 },
+    { 0x3730, 0x89 },
+    { 0x3731, 0x00 },
+    { 0x3732, 0x08 },
+    { 0x3733, 0x01 },
+    { 0x3734, 0xFE },
+    { 0x3735, 0x05 },
+    { 0x3740, 0x02 },
+    { 0x375D, 0x00 },
+    { 0x375E, 0x00 },
+    { 0x375F, 0x11 },
+    { 0x3760, 0x01 },
+    { 0x3768, 0x1B },
+    { 0x3769, 0x1B },
+    { 0x376A, 0x1B },
+    { 0x376B, 0x1B },
+    { 0x376C, 0x1A },
+    { 0x376D, 0x17 },
+    { 0x376E, 0x0F },
+    { 0x3776, 0x00 },
+    { 0x3777, 0x00 },
+    { 0x3778, 0x46 },
+    { 0x3779, 0x00 },
+    { 0x377A, 0x89 },
+    { 0x377B, 0x00 },
+    { 0x377C, 0x08 },
+    { 0x377D, 0x01 },
+    { 0x377E, 0x23 },
+    { 0x377F, 0x02 },
+    { 0x3780, 0xD9 },
+    { 0x3781, 0x03 },
+    { 0x3782, 0xF5 },
+    { 0x3783, 0x06 },
+    { 0x3784, 0xA5 },
+    { 0x3788, 0x0F },
+    { 0x378A, 0xD9 },
+    { 0x378B, 0x03 },
+    { 0x378C, 0xEB },
+    { 0x378D, 0x05 },
+    { 0x378E, 0x87 },
+    { 0x378F, 0x06 },
+    { 0x3790, 0xF5 },
+    { 0x3792, 0x43 },
+    { 0x3794, 0x7A },
+    { 0x3796, 0xA1 },
+    { 0x3A18, 0x7F },
+    { 0x3A1A, 0x37 },
+    { 0x3A1C, 0x37 },
+    { 0x3A1E, 0xF7 },
+    { 0x3A1F, 0x00 },
+    { 0x3A20, 0x3F },
+    { 0x3A22, 0x6F },
+    { 0x3A24, 0x3F },
+    { 0x3A26, 0x5F },
+    { 0x3A28, 0x2F },
+    { 0x3000, 0x00 },
+    { 0x3002, 0x00 },
+};
+
+const static I2C_ARRAY Sensor_init_table_4lane_5m120fps[] = {
+    /* "IMX335LQN All-pixel scan CSI-2_4lane 891Mbps AD:10bit Output:10bit 27MHz Master Mode 120fps" */
+    { 0x3002, 0x01 }, // Master mode stop
+    { 0xffff, 0x14 }, // delay
+    { 0x3000, 0x01 }, // standby
+    { 0xffff, 0x14 }, // delay
+    { 0x300C, 0x42 },
+    { 0x300D, 0x2E },
+    { 0x3018, 0x04 }, // window mode, 0-default | 3-binning | 4-cropping
+    { 0x302C, 0x80 }, // HTRIMMING Horiz Start in cropping  START
+    { 0x302D, 0x01 },
+    { 0x302E, 0x98 }, // HNUM Horiz size 0A20 - 2592 cropping size designation
+    { 0x302F, 0x07 },
+    { 0x3030, 0xF8 }, // VMAX default 1194h, 0CE4 for 2560x1440
+    { 0x3031, 0x08 }, // Cropping 08F8h - 1024 //Input AD
+    { 0x3032, 0x00 },
+    { 0x3034, 0x13 }, // HMAX default 0226h gives 59fps at 1080p, encoder can't handle more than 55!
+    { 0x3035, 0x01 }, // 16Eh for 90fps
+    { 0x3056, 0x4C }, // Y_OUT_SIZE effective pixel lines 07ACh
+    { 0x3057, 0x04 }, // 5B4h = 1440
+    { 0x3072, 0x28 }, // Vert Crop start
+    { 0x3073, 0x00 },
+    { 0x3074, 0x10 }, // AREA3_ST_Addr Upper left cropping postion
+    { 0x3075, 0x04 },
+    { 0x3076, 0x98 }, // AREA3_WIDTH_1 Vert Cropping Size designation * 2, = Y_OUT_SIZE * 2
+    { 0x3077, 0x08 },
+    { 0x3050, 0x00 },
+    { 0x30C6, 0x12 }, // Black Offset Addr 12h
+    { 0x30CE, 0x64 }, // UNRD_Line_Max in cropping
+    { 0x30D8, 0x78 }, // UNREAD_ED_ADR in cropping
+    { 0x30D9, 0x0D },
+    { 0x314C, 0x08 },
+    { 0x314D, 0x01 },
+    { 0x315A, 0x06 },
+    { 0x3168, 0x8F },
+    { 0x316A, 0x7E },
+    { 0x319D, 0x00 }, // 00: 10bit | 01: 12bit
+    { 0x319E, 0x02 }, // SYS_MODE = 891Mbps
+    { 0x31A1, 0x00 },
+    { 0x3288, 0x21 },
+    { 0x328A, 0x02 },
+    { 0x3414, 0x05 },
+    { 0x3416, 0x18 },
+    { 0x341C, 0xFF }, // Input AD bit, changing this affects output
+    { 0x341D, 0x01 }, // Input AD bit 0047-12bit | 01FF-10bit
+    { 0x3648, 0x01 },
+    { 0x364A, 0x04 },
+    { 0x364C, 0x04 },
+    { 0x3678, 0x01 },
+    { 0x367C, 0x31 },
+    { 0x367E, 0x31 },
+    { 0x3706, 0x10 },
+    { 0x3708, 0x03 },
+    { 0x3714, 0x02 },
+    { 0x3715, 0x02 },
+    { 0x3716, 0x01 },
+    { 0x3717, 0x03 },
+    { 0x371C, 0x3D },
+    { 0x371D, 0x3F },
+    { 0x372C, 0x00 },
+    { 0x372D, 0x00 },
+    { 0x372E, 0x46 },
+    { 0x372F, 0x00 },
+    { 0x3730, 0x89 },
+    { 0x3731, 0x00 },
+    { 0x3732, 0x08 },
+    { 0x3733, 0x01 },
+    { 0x3734, 0xFE },
+    { 0x3735, 0x05 },
+    { 0x3740, 0x02 },
+    { 0x375D, 0x00 },
+    { 0x375E, 0x00 },
+    { 0x375F, 0x11 },
+    { 0x3760, 0x01 },
+    { 0x3768, 0x1B },
+    { 0x3769, 0x1B },
+    { 0x376A, 0x1B },
+    { 0x376B, 0x1B },
+    { 0x376C, 0x1A },
+    { 0x376D, 0x17 },
+    { 0x376E, 0x0F },
+    { 0x3776, 0x00 },
+    { 0x3777, 0x00 },
+    { 0x3778, 0x46 },
+    { 0x3779, 0x00 },
+    { 0x377A, 0x89 },
+    { 0x377B, 0x00 },
+    { 0x377C, 0x08 },
+    { 0x377D, 0x01 },
+    { 0x377E, 0x23 },
+    { 0x377F, 0x02 },
+    { 0x3780, 0xD9 },
+    { 0x3781, 0x03 },
+    { 0x3782, 0xF5 },
+    { 0x3783, 0x06 },
+    { 0x3784, 0xA5 },
+    { 0x3788, 0x0F },
+    { 0x378A, 0xD9 },
+    { 0x378B, 0x03 },
+    { 0x378C, 0xEB },
+    { 0x378D, 0x05 },
+    { 0x378E, 0x87 },
+    { 0x378F, 0x06 },
+    { 0x3790, 0xF5 },
+    { 0x3792, 0x43 },
+    { 0x3794, 0x7A },
+    { 0x3796, 0xA1 },
+    { 0x3A18, 0x7F },
+    { 0x3A1A, 0x37 },
+    { 0x3A1C, 0x37 },
+    { 0x3A1E, 0xF7 },
+    { 0x3A1F, 0x00 },
+    { 0x3A20, 0x3F },
+    { 0x3A22, 0x6F },
+    { 0x3A24, 0x3F },
+    { 0x3A26, 0x5F },
+    { 0x3A28, 0x2F },
     { 0x3000, 0x00 },
     { 0x3002, 0x00 },
 };
@@ -725,7 +878,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3030, 0x9A }, // VMAX 1518: 5400 //4500 1194 //4250 109A
     { 0x3031, 0x10 },
     { 0x3032, 0x00 },
-    { 0x3034, 0x5D }, // HMAX 113: 275  14A          //15Dh 349
+    { 0x3034, 0x5D }, // HMAX 113: 275 14A //15Dh 349
     { 0x3035, 0x01 },
     { 0x3048, 0x01 },
     { 0x3049, 0x01 },
@@ -769,8 +922,8 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3300, 0x00 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341C, 0xFF }, // 0x47--12-bit   0xff--10bit
-    { 0x341D, 0x01 }, //
+    { 0x341C, 0xFF }, // 0x47--12-bit, 0xff--10bit
+    { 0x341D, 0x01 },
     { 0x3648, 0x01 },
     { 0x364A, 0x04 },
     { 0x364C, 0x04 },
@@ -840,7 +993,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3001, 0x00 },
     { 0x3002, 0x01 },
     { 0x3003, 0x00 },
-
     { 0x300c, 0x3b },
     { 0x300d, 0x2a },
     { 0x3018, 0x00 },
@@ -848,13 +1000,11 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x302d, 0x00 },
     { 0x302e, 0x38 },
     { 0x302f, 0x0a },
-
     { 0x3030, 0x9A }, // VMAX 1518: 5400 //4500 1194 //4250 109A
     { 0x3031, 0x10 },
     { 0x3032, 0x00 },
-    { 0x3034, 0x5D }, // HMAX 113: 275  14A          //15Dh 349
+    { 0x3034, 0x5D }, // HMAX 113: 275 14A //15Dh 349
     { 0x3035, 0x01 },
-
     { 0x3048, 0x01 },
     { 0x3049, 0x01 },
     { 0x304a, 0x04 },
@@ -889,7 +1039,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3075, 0x00 },
     { 0x3076, 0x58 },
     { 0x3077, 0x0f },
-
     { 0x3078, 0x01 },
     { 0x3079, 0x02 },
     { 0x307a, 0xff },
@@ -906,7 +1055,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3085, 0x00 },
     { 0x3086, 0x00 },
     { 0x3087, 0x00 },
-
     { 0x30a4, 0x33 },
     { 0x30a8, 0x10 },
     { 0x30a9, 0x04 },
@@ -918,7 +1066,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x30b5, 0x00 },
     { 0x30b6, 0x00 },
     { 0x30b7, 0x00 },
-
     { 0x30c6, 0x00 },
     { 0x30c7, 0x00 },
     { 0x30ce, 0x00 },
@@ -970,7 +1117,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3303, 0x00 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341c, 0xff }, // 0x47--12-bit   0xff--10bit
+    { 0x341c, 0xff }, // 0x47--12-bit, 0xff--10bit
     { 0x341d, 0x01 }, //
     { 0x3648, 0x01 },
     { 0x364a, 0x04 },
@@ -1056,7 +1203,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m25fps[] = {
     { 0x3a27, 0x00 },
     { 0x3a28, 0x3f },
     { 0x3a29, 0x00 },
-
     { 0x3000, 0x00 },
     { 0x3002, 0x00 },
 #endif
@@ -1074,7 +1220,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m20fps[] = {
     { 0x3030, 0xC0 }, // VMAX 1518: 5400 //4500 1194 //4250 109A
     { 0x3031, 0x14 },
     { 0x3032, 0x00 },
-    { 0x3034, 0x5D }, // HMAX 113: 275  14A          //15Dh 349
+    { 0x3034, 0x5D }, // HMAX 113: 275 14A //15Dh 349
     { 0x3035, 0x01 },
     { 0x3048, 0x01 },
     { 0x3049, 0x01 },
@@ -1118,7 +1264,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m20fps[] = {
     { 0x3300, 0x00 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341C, 0xFF }, // 0x47--12-bit   0xff--10bit
+    { 0x341C, 0xFF }, // 0x47--12-bit, 0xff--10bit
     { 0x341D, 0x01 }, //
     { 0x3648, 0x01 },
     { 0x364A, 0x04 },
@@ -1196,11 +1342,11 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m20fps[] = {
     { 0x302d, 0x00 },
     { 0x302e, 0x38 },
     { 0x302f, 0x0a },
-    { 0x3030, 0xc0 }, // 14c0:5312 1A5Eh : 6750  // 16A8h : 5800
+    { 0x3030, 0xc0 }, // 14c0:5312 1A5Eh : 6750 // 16A8h : 5800
     { 0x3031, 0x14 },
     { 0x3032, 0x00 },
     { 0x3033, 0x00 },
-    { 0x3034, 0x5d }, // 15d:349 113h : 275   // 140h : 320
+    { 0x3034, 0x5d }, // 15d:349 113h : 275 // 140h : 320
     { 0x3035, 0x01 },
     { 0x3048, 0x01 },
     { 0x3049, 0x01 },
@@ -1263,7 +1409,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m20fps[] = {
     { 0x30b5, 0x00 },
     { 0x30b6, 0x00 },
     { 0x30b7, 0x00 },
-
     { 0x30c6, 0x00 },
     { 0x30c7, 0x00 },
     { 0x30ce, 0x00 },
@@ -1315,7 +1460,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m20fps[] = {
     { 0x3303, 0x00 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341c, 0xff }, // 0x47--12-bit   0xff--10bit
+    { 0x341c, 0xff }, // 0x47--12-bit, 0xff--10bit
     { 0x341d, 0x01 }, //
     { 0x3648, 0x01 },
     { 0x364a, 0x04 },
@@ -1401,7 +1546,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m20fps[] = {
     { 0x3a27, 0x00 },
     { 0x3a28, 0x3f },
     { 0x3a29, 0x00 },
-
     { 0x3000, 0x00 },
     { 0x3002, 0x00 },
 #endif
@@ -1463,7 +1607,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x3300, 0x00 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341C, 0xFF }, // 0x47--12-bit   0xff--10bit
+    { 0x341C, 0xFF }, // 0x47--12-bit, 0xff--10bit
     { 0x341D, 0x01 }, //
     { 0x3648, 0x01 },
     { 0x364A, 0x04 },
@@ -1534,7 +1678,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x3001, 0x00 },
     { 0x3002, 0x01 },
     { 0x3003, 0x00 },
-
     { 0x300c, 0x3b },
     { 0x300d, 0x2a },
     { 0x3018, 0x00 },
@@ -1542,7 +1685,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x302d, 0x00 },
     { 0x302e, 0x38 },
     { 0x302f, 0x0a },
-
     { 0x3030, 0x9a }, // VMAX 119a:4506, 109ah:4250
     { 0x3031, 0x10 },
     { 0x3032, 0x00 },
@@ -1583,7 +1725,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x3075, 0x00 },
     { 0x3076, 0x58 },
     { 0x3077, 0x0f },
-
     { 0x3078, 0x01 },
     { 0x3079, 0x02 },
     { 0x307a, 0xff },
@@ -1600,7 +1741,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x3085, 0x00 },
     { 0x3086, 0x00 },
     { 0x3087, 0x00 },
-
     { 0x30a4, 0x33 },
     { 0x30a8, 0x10 },
     { 0x30a9, 0x04 },
@@ -1612,7 +1752,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x30b5, 0x00 },
     { 0x30b6, 0x00 },
     { 0x30b7, 0x00 },
-
     { 0x30c6, 0x00 },
     { 0x30c7, 0x00 },
     { 0x30ce, 0x00 },
@@ -1664,7 +1803,7 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x3303, 0x00 },
     { 0x3414, 0x05 },
     { 0x3416, 0x18 },
-    { 0x341c, 0xff }, // 0x47--12-bit   0xff--10bit
+    { 0x341c, 0xff }, // 0x47--12-bit, 0xff--10bit
     { 0x341d, 0x01 }, //
     { 0x3648, 0x01 },
     { 0x364a, 0x04 },
@@ -1750,7 +1889,6 @@ const static I2C_ARRAY Sensor_init_table_HDR_DOL_4lane5m30fps[] = {
     { 0x3a27, 0x00 },
     { 0x3a28, 0x3f },
     { 0x3a29, 0x00 },
-
     { 0x3000, 0x00 },
     { 0x3002, 0x00 },
 #endif
@@ -2028,52 +2166,6 @@ static int imx335_SetPatternMode(ms_cus_sensor* handle, u32 mode)
     return SUCCESS;
 }
 
-static int pCus_init_mipi2lane_5m25fps_linear(ms_cus_sensor* handle)
-{
-    int i, cnt = 0;
-
-    SENSOR_DMSG("\n[%s]", __FUNCTION__);
-
-    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_2lane_5m25fps); i++) {
-        if (Sensor_init_table_2lane_5m25fps[i].reg == 0xffff) {
-            SENSOR_MSLEEP(Sensor_init_table_2lane_5m25fps[i].data);
-        } else {
-            cnt = 0;
-            while (SensorReg_Write(Sensor_init_table_2lane_5m25fps[i].reg, Sensor_init_table_2lane_5m25fps[i].data) != SUCCESS) {
-                cnt++;
-                if (cnt >= 10) {
-                    return FAIL;
-                }
-                // usleep(10*1000);
-            }
-        }
-    }
-    return SUCCESS;
-}
-
-static int pCus_init_mipi2lane_5m30fps_linear(ms_cus_sensor* handle)
-{
-    int i, cnt = 0;
-
-    SENSOR_DMSG("\n[%s]", __FUNCTION__);
-
-    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_2lane_5m30fps); i++) {
-        if (Sensor_init_table_2lane_5m30fps[i].reg == 0xffff) {
-            SENSOR_MSLEEP(Sensor_init_table_2lane_5m30fps[i].data);
-        } else {
-            cnt = 0;
-            while (SensorReg_Write(Sensor_init_table_2lane_5m30fps[i].reg, Sensor_init_table_2lane_5m30fps[i].data) != SUCCESS) {
-                cnt++;
-                if (cnt >= 10) {
-                    return FAIL;
-                }
-                // usleep(10*1000);
-            }
-        }
-    }
-    return SUCCESS;
-}
-
 static int pCus_init_mipi4lane_5m30fps_linear(ms_cus_sensor* handle)
 {
     int i, cnt = 0;
@@ -2097,18 +2189,18 @@ static int pCus_init_mipi4lane_5m30fps_linear(ms_cus_sensor* handle)
     return SUCCESS;
 }
 
-static int pCus_init_mipi4lane_5m25fps_linear(ms_cus_sensor* handle)
+static int pCus_init_mipi4lane_5m60fps_linear(ms_cus_sensor* handle)
 {
     int i, cnt = 0;
 
     SENSOR_DMSG("\n[%s]", __FUNCTION__);
 
-    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_4lane_5m25fps); i++) {
-        if (Sensor_init_table_4lane_5m25fps[i].reg == 0xffff) {
-            SENSOR_MSLEEP(Sensor_init_table_4lane_5m25fps[i].data);
+    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_4lane_5m60fps); i++) {
+        if (Sensor_init_table_4lane_5m60fps[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_init_table_4lane_5m60fps[i].data);
         } else {
             cnt = 0;
-            while (SensorReg_Write(Sensor_init_table_4lane_5m25fps[i].reg, Sensor_init_table_4lane_5m25fps[i].data) != SUCCESS) {
+            while (SensorReg_Write(Sensor_init_table_4lane_5m60fps[i].reg, Sensor_init_table_4lane_5m60fps[i].data) != SUCCESS) {
                 cnt++;
                 if (cnt >= 10) {
                     return FAIL;
@@ -2120,18 +2212,64 @@ static int pCus_init_mipi4lane_5m25fps_linear(ms_cus_sensor* handle)
     return SUCCESS;
 }
 
-static int pCus_init_mipi4lane5m25fps_HDR_DOL(ms_cus_sensor* handle)
+static int pCus_init_mipi4lane_5m80fps_linear(ms_cus_sensor* handle)
 {
     int i, cnt = 0;
 
     SENSOR_DMSG("\n[%s]", __FUNCTION__);
 
-    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_HDR_DOL_4lane5m25fps); i++) {
-        if (Sensor_init_table_HDR_DOL_4lane5m25fps[i].reg == 0xffff) {
-            SENSOR_MSLEEP(Sensor_init_table_HDR_DOL_4lane5m25fps[i].data);
+    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_4lane_5m80fps); i++) {
+        if (Sensor_init_table_4lane_5m80fps[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_init_table_4lane_5m80fps[i].data);
         } else {
             cnt = 0;
-            while (SensorReg_Write(Sensor_init_table_HDR_DOL_4lane5m25fps[i].reg, Sensor_init_table_HDR_DOL_4lane5m25fps[i].data) != SUCCESS) {
+            while (SensorReg_Write(Sensor_init_table_4lane_5m80fps[i].reg, Sensor_init_table_4lane_5m80fps[i].data) != SUCCESS) {
+                cnt++;
+                if (cnt >= 10) {
+                    return FAIL;
+                }
+                // usleep(10*1000);
+            }
+        }
+    }
+    return SUCCESS;
+}
+
+static int pCus_init_mipi4lane_5m100fps_linear(ms_cus_sensor* handle)
+{
+    int i, cnt = 0;
+
+    SENSOR_DMSG("\n[%s]", __FUNCTION__);
+
+    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_4lane_5m100fps); i++) {
+        if (Sensor_init_table_4lane_5m100fps[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_init_table_4lane_5m100fps[i].data);
+        } else {
+            cnt = 0;
+            while (SensorReg_Write(Sensor_init_table_4lane_5m100fps[i].reg, Sensor_init_table_4lane_5m100fps[i].data) != SUCCESS) {
+                cnt++;
+                if (cnt >= 10) {
+                    return FAIL;
+                }
+                // usleep(10*1000);
+            }
+        }
+    }
+    return SUCCESS;
+}
+
+static int pCus_init_mipi4lane_5m120fps_linear(ms_cus_sensor* handle)
+{
+    int i, cnt = 0;
+
+    SENSOR_DMSG("\n[%s]", __FUNCTION__);
+
+    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_4lane_5m120fps); i++) {
+        if (Sensor_init_table_4lane_5m120fps[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_init_table_4lane_5m120fps[i].data);
+        } else {
+            cnt = 0;
+            while (SensorReg_Write(Sensor_init_table_4lane_5m120fps[i].reg, Sensor_init_table_4lane_5m120fps[i].data) != SUCCESS) {
                 cnt++;
                 if (cnt >= 10) {
                     return FAIL;
@@ -2155,6 +2293,29 @@ static int pCus_init_mipi4lane5m20fps_HDR_DOL(ms_cus_sensor* handle)
         } else {
             cnt = 0;
             while (SensorReg_Write(Sensor_init_table_HDR_DOL_4lane5m20fps[i].reg, Sensor_init_table_HDR_DOL_4lane5m20fps[i].data) != SUCCESS) {
+                cnt++;
+                if (cnt >= 10) {
+                    return FAIL;
+                }
+                // usleep(10*1000);
+            }
+        }
+    }
+    return SUCCESS;
+}
+
+static int pCus_init_mipi4lane5m25fps_HDR_DOL(ms_cus_sensor* handle)
+{
+    int i, cnt = 0;
+
+    SENSOR_DMSG("\n[%s]", __FUNCTION__);
+
+    for (i = 0; i < ARRAY_SIZE(Sensor_init_table_HDR_DOL_4lane5m25fps); i++) {
+        if (Sensor_init_table_HDR_DOL_4lane5m25fps[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_init_table_HDR_DOL_4lane5m25fps[i].data);
+        } else {
+            cnt = 0;
+            while (SensorReg_Write(Sensor_init_table_HDR_DOL_4lane5m25fps[i].reg, Sensor_init_table_HDR_DOL_4lane5m25fps[i].data) != SUCCESS) {
                 cnt++;
                 if (cnt >= 10) {
                     return FAIL;
@@ -2235,33 +2396,48 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
     switch (res_idx) {
     case 0:
         handle->video_res_supported.ulcur_res = 0;
-        if (lane_num == 2) {
-            handle->pCus_sensor_init = pCus_init_mipi2lane_5m25fps_linear;
-        } else if (lane_num == 4) {
-            handle->pCus_sensor_init = pCus_init_mipi4lane_5m25fps_linear;
-        } else {
-            handle->pCus_sensor_init = pCus_init_mipi4lane_5m25fps_linear;
-        }
-        vts_30fps = 4950;
-        Preview_MAX_FPS = 25;
-        Preview_line_period = 8080;
-        break;
-    case 1:
-        handle->video_res_supported.ulcur_res = 1;
-        if (lane_num == 2) {
-            handle->pCus_sensor_init = pCus_init_mipi2lane_5m30fps_linear;
-        } else if (lane_num == 4) {
-            handle->pCus_sensor_init = pCus_init_mipi4lane_5m30fps_linear;
-        } else {
-            handle->pCus_sensor_init = pCus_init_mipi4lane_5m30fps_linear;
-        }
+        handle->pCus_sensor_init = pCus_init_mipi4lane_5m30fps_linear;
         vts_30fps = 4125;
         Preview_MAX_FPS = 30;
         Preview_line_period = 8080;
         break;
+
+    case 1:
+        handle->video_res_supported.ulcur_res = 1;
+        handle->pCus_sensor_init = pCus_init_mipi4lane_5m60fps_linear;
+        vts_30fps = 3016;
+        Preview_MAX_FPS = 60;
+        Preview_line_period = 4800;
+        break;
+
+    case 2:
+        handle->video_res_supported.ulcur_res = 2;
+        handle->pCus_sensor_init = pCus_init_mipi4lane_5m80fps_linear;
+        vts_30fps = 3016;
+        Preview_MAX_FPS = 80;
+        Preview_line_period = 4000;
+        break;
+
+    case 3:
+        handle->video_res_supported.ulcur_res = 3;
+        handle->pCus_sensor_init = pCus_init_mipi4lane_5m100fps_linear;
+        vts_30fps = 2688;
+        Preview_MAX_FPS = 100;
+        Preview_line_period = 3720;
+        break;
+
+    case 4:
+        handle->video_res_supported.ulcur_res = 4;
+        handle->pCus_sensor_init = pCus_init_mipi4lane_5m120fps_linear;
+        vts_30fps = 2296;
+        Preview_MAX_FPS = 120;
+        Preview_line_period = 3720;
+        break;
+
     default:
         break;
     }
+
     params->expo.vts = vts_30fps;
     params->expo.fps = Preview_MAX_FPS;
 
@@ -2300,6 +2476,7 @@ static int pCus_SetVideoRes_HDR_DOL(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period_HDR_DOL = 9411; // 8889
         params->max_rhs1 = 290;
         break;
+
     case 1:
         handle->video_res_supported.ulcur_res = 1;
         handle->pCus_sensor_init = pCus_init_mipi4lane5m20fps_HDR_DOL;
@@ -2310,6 +2487,7 @@ static int pCus_SetVideoRes_HDR_DOL(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period_HDR_DOL = 9411;
         params->max_rhs1 = 290;
         break;
+
     case 2:
         handle->video_res_supported.ulcur_res = 2;
         handle->pCus_sensor_init = pCus_init_mipi4lane5m30fps_HDR_DOL;
@@ -2320,9 +2498,11 @@ static int pCus_SetVideoRes_HDR_DOL(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period_HDR_DOL = 7843;
         params->max_rhs1 = 290;
         break;
+
     default:
         break;
     }
+
     return SUCCESS;
 }
 
