@@ -152,9 +152,9 @@ static struct { // LINEAR
 } imx415_mipi_linear[] = {
     { LINEAR_RES_1, { 3840, 2160, 3, 20 }, { 0, 0, 3840, 2160 }, { "3840x2160@20fps" } },
     { LINEAR_RES_2, { 3200, 1800, 3, 30 }, { 0, 0, 3840, 2160 }, { "3200x1800@30fps" } },
-    { LINEAR_RES_3, { 1920, 1080, 3, 60 }, { 0, 0, 1920, 1080 }, { "1920x1080@60fps" } },
+    { LINEAR_RES_3, { 2560, 1440, 3, 60 }, { 0, 0, 2952, 1656 }, { "2952x1656@60fps" } },
     { LINEAR_RES_4, { 1920, 1080, 3, 90 }, { 0, 0, 1920, 1080 }, { "1920x1080@90fps" } },
-    { LINEAR_RES_5, { 1280, 720, 3, 120 }, { 0, 0, 1280,  720 }, { "1280x720@120fps" } },
+    { LINEAR_RES_5, { 1448, 812, 3, 120 }, { 0, 0, 1448,  812 }, { "1448x812@120fps" } },
 };
 
 static struct { // HDR
@@ -528,28 +528,32 @@ const static I2C_ARRAY Sensor_8m_30fps_init_table_4lane_linear[] = {
     { 0x3000, 0x00 }, // Operating
 };
 
-// 1920x1080@60fps
-const static I2C_ARRAY Sensor_2m_60fps_init_table_4lane_linear[] = {
-    /*
-    IMX415-AAQR 2/2-line binning CSI-2_4lane 27MHz AD:10bit Output:12bit 891Mbps Master Mode 59.998fps Integration Time 16.61ms
-    */
+// 2952x1656@60fps
+const static I2C_ARRAY Sensor_4m_60fps_init_table_4lane_linear[] = {
     { 0x3000, 0x01 }, // Standby
     { 0x3002, 0x01 }, // Master mode stop
     { 0x3008, 0x5D }, // BCWAIT_TIME[9:0]
     { 0x300A, 0x42 }, // CPWAIT_TIME[9:0]
-    { 0x3020, 0x01 }, // HADD (horizontal binning)
-    { 0x3021, 0x01 }, // VADD (vertical binning)
-    { 0x3022, 0x01 }, // ADDMODE (binning 2/2)
-    { 0x3024, 0xCA }, // VMAX (line number 0x8CA)
-    { 0x3025, 0x08 }, //
-    { 0x3028, 0x1B }, // HMAX (clock number 0x21B)
+    { 0x30E2, 0x32 }, //
+    { 0x30E3, 0x00 }, //
+    { 0x301C, 0x04 }, // WINMODE (cropping mode)
+    { 0x3024, 0xB8 }, // VMAX (line number 0x8CA)
+    { 0x3025, 0x06 }, //
+    { 0x3028, 0xBC }, // HMAX (clock number 0x3FE)
     { 0x3029, 0x02 }, //
     { 0x3031, 0x00 }, // ADBIT (10bit)
+    { 0x3032, 0x00 }, //
     { 0x3033, 0x05 }, // SYS_MODE (891Mbps)
+    { 0x3040, 0xBC }, // PIX_HST (start hcrop 0x288)
+    { 0x3041, 0x01 }, //
+    { 0x3042, 0x88 }, // PIX_HWIDTH (window hcrop 0xA08)
+    { 0x3043, 0x0B }, //
+    { 0x3044, 0xF8 }, // PIX_VST (start vcrop 0x2F0)
+    { 0x3045, 0x01 }, //
+    { 0x3046, 0xF0 }, // PIX_VWIDTH (window vcrop 0xB40)
+    { 0x3047, 0x0C }, //
     { 0x3050, 0x08 }, // SHR0[19:0]
     { 0x30C1, 0x00 }, // XVS_DRV[1:0]
-    { 0x30D9, 0x02 }, // DIG_CLP_VSTART (binning 2/2)
-    { 0x30DA, 0x01 }, // DIG_CLP_VNUM (binning 2/2)
     { 0x3116, 0x23 }, // INCKSEL2
     { 0x3118, 0xC6 }, // INCKSEL3
     { 0x311A, 0xE7 }, // INCKSEL4
@@ -764,11 +768,8 @@ const static I2C_ARRAY Sensor_2m_90fps_init_table_4lane_linear[] = {
     { 0x3000, 0x00 }, // Operating
 };
 
-// 1280x720@120fps
+// 1448x812@120fps
 const static I2C_ARRAY Sensor_1m_120fps_init_table_4lane_linear[] = {
-    /*
-    IMX415-AAQR 2/2-line binning & Window cropping 2568x1440 CSI-2_4lane 27MHz AD:10bit Output:12bit 891Mbps Master Mode 120fps Integration Time 8.3ms
-    */
     { 0x3000, 0x01 }, // Standby
     { 0x3002, 0x01 }, // Master mode stop
     { 0x3008, 0x5D }, // BCWAIT_TIME[9:0]
@@ -777,20 +778,20 @@ const static I2C_ARRAY Sensor_1m_120fps_init_table_4lane_linear[] = {
     { 0x3020, 0x01 }, // HADD (horizontal binning)
     { 0x3021, 0x01 }, // VADD (vertical binning)
     { 0x3022, 0x01 }, // ADDMODE (binning 2/2)
-    { 0x3024, 0x6C }, // VMAX (line number 0x66C)
+    { 0x3024, 0xA4 }, // VMAX (line number 0x66C) - 1700
     { 0x3025, 0x06 }, //
     { 0x3028, 0x6D }, // HMAX (clock number 0x16D)
     { 0x3029, 0x01 }, //
     { 0x3031, 0x00 }, // ADBIT (10bit)
     { 0x3033, 0x05 }, // SYS_MODE (891Mbps)
-    { 0x3040, 0x88 }, // PIX_HST (start hcrop 0x288)
-    { 0x3041, 0x02 }, //
-    { 0x3042, 0x08 }, // PIX_HWIDTH (window hcrop 0xA08)
-    { 0x3043, 0x0A }, //
-    { 0x3044, 0xF0 }, // PIX_VST (start vcrop 0x2F0)
+    { 0x3040, 0xD4 }, // PIX_HST (start hcrop 0x288) - 468
+    { 0x3041, 0x01 }, //
+    { 0x3042, 0x70 }, // PIX_HWIDTH (window hcrop 0xA08) - 2928
+    { 0x3043, 0x0B }, //
+    { 0x3044, 0x24 }, // PIX_VST (start vcrop 0x2F0) - 548
     { 0x3045, 0x02 }, //
-    { 0x3046, 0x40 }, // PIX_VWIDTH (window vcrop 0xB40)
-    { 0x3047, 0x0B }, //
+    { 0x3046, 0xD8 }, // PIX_VWIDTH (window vcrop 0xB40) - 3288
+    { 0x3047, 0x0C }, //
     { 0x3050, 0x08 }, // SHR0[19:0]
     { 0x30C1, 0x00 }, // XVS_DRV[1:0]
     { 0x30D9, 0x02 }, // DIG_CLP_VSTART (binning 2/2)
@@ -2079,7 +2080,7 @@ static int pCus_init_8m_30fps_mipi4lane_linear(ms_cus_sensor* handle)
     return SUCCESS;
 }
 
-static int pCus_init_2m_60fps_mipi4lane_linear(ms_cus_sensor* handle)
+static int pCus_init_4m_60fps_mipi4lane_linear(ms_cus_sensor* handle)
 {
     // imx415_params *params = (imx415_params *)handle->private_data;
     int i, cnt = 0;
@@ -2089,12 +2090,12 @@ static int pCus_init_2m_60fps_mipi4lane_linear(ms_cus_sensor* handle)
         return FAIL;
     }
 
-    for (i = 0; i < ARRAY_SIZE(Sensor_2m_60fps_init_table_4lane_linear); i++) {
-        if (Sensor_2m_60fps_init_table_4lane_linear[i].reg == 0xffff) {
-            SENSOR_MSLEEP(Sensor_2m_60fps_init_table_4lane_linear[i].data);
+    for (i = 0; i < ARRAY_SIZE(Sensor_4m_60fps_init_table_4lane_linear); i++) {
+        if (Sensor_4m_60fps_init_table_4lane_linear[i].reg == 0xffff) {
+            SENSOR_MSLEEP(Sensor_4m_60fps_init_table_4lane_linear[i].data);
         } else {
             cnt = 0;
-            while (SensorReg_Write(Sensor_2m_60fps_init_table_4lane_linear[i].reg, Sensor_2m_60fps_init_table_4lane_linear[i].data) != SUCCESS) {
+            while (SensorReg_Write(Sensor_4m_60fps_init_table_4lane_linear[i].reg, Sensor_4m_60fps_init_table_4lane_linear[i].data) != SUCCESS) {
                 cnt++;
                 if (cnt >= 10) {
                     SENSOR_EMSG("[%s:%d]Sensor init fail!!\n", __FUNCTION__, __LINE__);
@@ -2407,6 +2408,7 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period = 22133; // 49.8ms/2250 = 22133ns
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
+
     case 1:
         handle->video_res_supported.ulcur_res = 1;
         handle->pCus_sensor_init = pCus_init_8m_30fps_mipi4lane_linear;
@@ -2416,15 +2418,17 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period = 14800; // 33.3ms/2250 = 14800ns;
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
+
     case 2:
         handle->video_res_supported.ulcur_res = 2;
-        handle->pCus_sensor_init = pCus_init_2m_60fps_mipi4lane_linear;
-        vts_30fps = 2250;
+        handle->pCus_sensor_init = pCus_init_4m_60fps_mipi4lane_linear;
+        vts_30fps = 1720;
         params->expo.vts = vts_30fps;
         params->expo.fps = 60;
-        Preview_line_period = 7377; // 16.6ms/2250 = 7377ns;
+        Preview_line_period = 9651; // 16.6ms/1720 = 9651ns;
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
+
     case 3:
         handle->video_res_supported.ulcur_res = 3;
         handle->pCus_sensor_init = pCus_init_2m_90fps_mipi4lane_linear;
@@ -2434,14 +2438,18 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         Preview_line_period = 4933; // 11.1ms/2250 = 4933ns;
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
+
     case 4:
         handle->video_res_supported.ulcur_res = 4;
         handle->pCus_sensor_init = pCus_init_1m_120fps_mipi4lane_linear;
-        vts_30fps = 1644;
+        vts_30fps = 1700;
         params->expo.vts = vts_30fps;
         params->expo.fps = 120;
-        Preview_line_period = 5049; // 8.3ms/1644 = 5049ns;
+        Preview_line_period = 4882; // 8.3ms/1700 = 4882ns;
         handle->data_prec = CUS_DATAPRECISION_12;
+        break;
+
+    default:
         break;
     }
     return SUCCESS;
@@ -2498,6 +2506,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_12;
         params->min_rhs1 = 437; // 4n+1 fix to 269, 337 //5ms: 429
         break;
+
     case HDR_RES_2:
         handle->pCus_sensor_init = pCus_init_8m_20fps_mipi4lane_HDR_DOL;
         vts_30fps_HDR_DOL_4lane = 3450;
@@ -2507,6 +2516,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_10;
         params->min_rhs1 = 437; // 4n+1 fix to 269, 337 //5ms: 429
         break;
+
     case HDR_RES_3:
         handle->pCus_sensor_init = pCus_init_8m_30fps_mipi4lane_HDR_DOL;
         vts_30fps_HDR_DOL_4lane = 2300;
@@ -2516,6 +2526,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_10;
         params->min_rhs1 = 437; // 4n+1 fix to 269, 337 //5ms: 429
         break;
+
     case HDR_RES_4:
         handle->pCus_sensor_init = pCus_init_5m_30fps_mipi4lane_HDR_DOL;
         vts_30fps_HDR_DOL_4lane = 2300;
@@ -2525,6 +2536,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_10;
         params->min_rhs1 = 437; // 4n+1 fix to 269, 337 //5ms: 429
         break;
+
     case HDR_RES_5:
         handle->pCus_sensor_init = pCus_init_4p8m_30fps_mipi4lane_HDR_DOL;
         vts_30fps_HDR_DOL_4lane = 2300;
@@ -2534,6 +2546,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_10;
         params->min_rhs1 = 365; // 4n+1 fix to 269, 337 //5ms: 429
         break;
+
     case HDR_RES_6:
         handle->pCus_sensor_init = pCus_init_4m_30fps_mipi4lane_HDR_DOL;
         vts_30fps_HDR_DOL_4lane = 2300;
@@ -2543,6 +2556,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_10;
         params->min_rhs1 = 365; // 4ms: 343 //5ms: 429
         break;
+
     case HDR_RES_7:
         handle->pCus_sensor_init = pCus_init_2m_30fps_mipi4lane_HDR_DOL;
         vts_30fps_HDR_DOL_4lane = 2296;
@@ -2552,6 +2566,7 @@ static int pCus_SetVideoRes_HDR_DOL_SEF(ms_cus_sensor* handle, u32 res_idx)
         handle->data_prec = CUS_DATAPRECISION_12;
         params->min_rhs1 = 437; // 4n+1 fix to 269, 337 //5ms: 429
         break;
+
     default:
         break;
     }
