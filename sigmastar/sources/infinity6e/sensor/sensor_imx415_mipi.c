@@ -152,7 +152,7 @@ static struct { // LINEAR
 } imx415_mipi_linear[] = {
     { LINEAR_RES_1, { 3840, 2160, 3, 20 }, { 0, 0, 3840, 2160 }, { "3840x2160@20fps" } },
     { LINEAR_RES_2, { 3200, 1800, 3, 30 }, { 0, 0, 3840, 2160 }, { "3200x1800@30fps" } },
-    { LINEAR_RES_3, { 2560, 1440, 3, 60 }, { 0, 0, 2952, 1656 }, { "2952x1656@60fps" } },
+    { LINEAR_RES_3, { 2240, 1260, 3, 60 }, { 0, 0, 2952, 1656 }, { "2952x1656@60fps" } },
     { LINEAR_RES_4, { 1920, 1080, 3, 90 }, { 0, 0, 1920, 1080 }, { "1920x1080@90fps" } },
     { LINEAR_RES_5, { 1448, 812, 3, 120 }, { 0, 0, 1448,  812 }, { "1448x812@120fps" } },
 };
@@ -2425,8 +2425,8 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         vts_30fps = 1720;
         params->expo.vts = vts_30fps;
         params->expo.fps = 60;
-        Preview_line_period = 9651; // 16.6ms/1720 = 9651ns;
-        handle->data_prec = CUS_DATAPRECISION_12;
+        Preview_line_period = 10660; // 16.6ms/1720 = 9651ns;
+        handle->data_prec = CUS_DATAPRECISION_10;
         break;
 
     case 3:
@@ -2445,7 +2445,7 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
         vts_30fps = 1700;
         params->expo.vts = vts_30fps;
         params->expo.fps = 120;
-        Preview_line_period = 4882; // 8.3ms/1700 = 4882ns;
+        Preview_line_period = 5049; // 8.3ms/1700 = 4882ns;
         handle->data_prec = CUS_DATAPRECISION_12;
         break;
 
