@@ -554,18 +554,22 @@ static int pCus_SetOrien(ms_cus_sensor* handle, CUS_CAMSENSOR_ORIT orit)
     switch (orit) {
     case CUS_ORIT_M0F0:
         params->tMirror_reg[0].data = 0;
+        params->cur_orien = CUS_ORIT_M0F0;
         params->orient_dirty = true;
         break;
     case CUS_ORIT_M1F0:
         params->tMirror_reg[0].data = 6;
+        params->cur_orien = CUS_ORIT_M1F0;
         params->orient_dirty = true;
         break;
     case CUS_ORIT_M0F1:
         params->tMirror_reg[0].data = 0x60;
+        params->cur_orien = CUS_ORIT_M0F1;
         params->orient_dirty = true;
         break;
     case CUS_ORIT_M1F1:
         params->tMirror_reg[0].data = 0x66;
+        params->cur_orien = CUS_ORIT_M1F1;
         params->orient_dirty = true;
         break;
     }
