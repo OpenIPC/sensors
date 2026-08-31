@@ -1845,7 +1845,7 @@ int cus_camsensor_init_handle(ms_cus_sensor* drv_handle)
     ////////////////////////////////////
     //    sensor model ID                           //
     ////////////////////////////////////
-    SENSOR_DMSG(handle->model_id, "sc450ai_MIPI");
+    sprintf(handle->model_id, "sc450ai_MIPI");
 
     ////////////////////////////////////
     //    sensor interface info       //
