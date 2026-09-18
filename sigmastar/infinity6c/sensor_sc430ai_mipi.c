@@ -71,8 +71,6 @@ SENSOR_DRV_ENTRY_IMPL_BEGIN_EX(SC430AI);
 #define Preview_MCLK_SPEED CUS_CMU_CLK_27MHZ // CFG //CUS_CMU_CLK_12M, CUS_CMU_CLK_16M, CUS_CMU_CLK_24M, CUS_CMU_CLK_27M
 #define Preview_MCLK_SPEED_HDR CUS_CMU_CLK_27MHZ
 
-u32 Preview_line_period;
-u32 vts_30fps;
 #define Preview_line_period_HDR 10101
 #define vts_30fps_HDR 3300
 #define Preview_WIDTH 2688 // resolution Width when preview
@@ -198,6 +196,8 @@ typedef struct {
         u32 preview_fps;
         u32 max_short_exp;
         u32 line;
+        u32 line_period; // ns, for the selected linear mode
+        u32 vts_base;    // VTS at the mode's max_fps
     } expo;
     struct {
         bool bVideoMode;
@@ -1024,26 +1024,26 @@ static int pCus_SetVideoRes(ms_cus_sensor* handle, u32 res_idx)
     case 0: //"2688x1520@30fps"
         handle->video_res_supported.ulcur_res = 0;
         handle->pCus_sensor_init = pCus_init_linear_4M30fps;
-        vts_30fps = 1650;
-        params->expo.vts = vts_30fps;
+        params->expo.vts_base = 1650;
+        params->expo.vts = params->expo.vts_base;
         params->expo.fps = 30;
-        Preview_line_period = 20202;
+        params->expo.line_period = 20202;
         break;
     case 1: //"2560x1440@30fps" (sensor outputs 2688x1520, VIF crops at 64,40)
         handle->video_res_supported.ulcur_res = 1;
         handle->pCus_sensor_init = pCus_init_linear_4M30fps;
-        vts_30fps = 1650;
-        params->expo.vts = vts_30fps;
+        params->expo.vts_base = 1650;
+        params->expo.vts = params->expo.vts_base;
         params->expo.fps = 30;
-        Preview_line_period = 20202;
+        params->expo.line_period = 20202;
         break;
     case 2: //"2688x1520@60fps"
         handle->video_res_supported.ulcur_res = 2;
         handle->pCus_sensor_init = pCus_init_linear_4M60fps;
-        vts_30fps = 1650;
-        params->expo.vts = vts_30fps;
+        params->expo.vts_base = 1650;
+        params->expo.vts = params->expo.vts_base;
         params->expo.fps = 60;
-        Preview_line_period = 10101;
+        params->expo.line_period = 10101;
         break;
     default:
         break;
@@ -1137,9 +1137,9 @@ static int pCus_GetFPS(ms_cus_sensor* handle)
     u32 tVts = (params->tVts_reg[0].data << 8) | (params->tVts_reg[1].data << 0);
 
     if (params->expo.fps >= 1000)
-        params->expo.preview_fps = (vts_30fps * max_fps * 1000) / tVts;
+        params->expo.preview_fps = (params->expo.vts_base * max_fps * 1000) / tVts;
     else
-        params->expo.preview_fps = (vts_30fps * max_fps) / tVts;
+        params->expo.preview_fps = (params->expo.vts_base * max_fps) / tVts;
 
     return params->expo.preview_fps;
 }
@@ -1153,10 +1153,10 @@ static int pCus_SetFPS(ms_cus_sensor* handle, u32 fps)
 
     if (fps >= min_fps && fps <= max_fps) {
         params->expo.fps = fps;
-        params->expo.vts = (vts_30fps * max_fps) / fps;
+        params->expo.vts = (params->expo.vts_base * max_fps) / fps;
     } else if ((fps >= (min_fps * 1000)) && (fps <= (max_fps * 1000))) {
         params->expo.fps = fps;
-        params->expo.vts = (vts_30fps * (max_fps * 1000)) / fps;
+        params->expo.vts = (params->expo.vts_base * (max_fps * 1000)) / fps;
     } else {
         SENSOR_DMSG("[%s] FPS %d out of range.\n", __FUNCTION__, fps);
         return FAIL;
@@ -1177,7 +1177,7 @@ static int pCus_GetFPS_HDR(ms_cus_sensor* handle)
 {
     sc430ai_params* params = (sc430ai_params*)handle->private_data;
     u32 max_fps = handle->video_res_supported.res[handle->video_res_supported.ulcur_res].max_fps;
-    u32 tVts = (params->tVts_reg[0].data << 8) | (params->tVts_reg[1].data << 0);
+    u32 tVts = (params->tVts_reg_HDR[0].data << 8) | (params->tVts_reg_HDR[1].data << 0);
 
     if (params->expo.fps >= 1000)
         params->expo.preview_fps = (vts_30fps_HDR * max_fps * 1000) / tVts;
@@ -1328,12 +1328,26 @@ static int pCus_GetAEUSecs_HDR_SEF(ms_cus_sensor* handle, u32* us)
     u32 lines = 0;
     sc430ai_params* params = (sc430ai_params*)handle->private_data;
     lines |= (u32)(params->tExpo_reg_HDR_SEF[0].data & 0xff) << 8;
-    lines |= (u32)(params->tExpo_reg_HDR_SEF[1].data & 0xff) << 0;
-
-    *us = (lines * Preview_line_period_HDR) / 1000;
+    lines |= (u32)(params->tExpo_reg_HDR_SEF[1].data & 0xf0) << 0;
+    lines >>= 4; // the setter stores half lines << 4
+    *us = (lines * Preview_line_period_HDR) / 1000 / 2;
 
     SENSOR_DMSG("[%s] sensor expo lines/us %ld,%ld us\n", __FUNCTION__, lines, *us);
 
+    return SUCCESS;
+}
+
+static int pCus_GetAEUSecs_HDR_LEF(ms_cus_sensor* handle, u32* us)
+{
+    u32 lines = 0;
+    sc430ai_params* params = (sc430ai_params*)handle->private_data;
+    lines |= (u32)(params->tExpo_reg[0].data & 0x0f) << 16;
+    lines |= (u32)(params->tExpo_reg[1].data & 0xff) << 8;
+    lines |= (u32)(params->tExpo_reg[2].data & 0xf0) << 0;
+    lines >>= 4; // half lines
+    *us = (lines * Preview_line_period_HDR) / 1000 / 2;
+
+    SENSOR_DMSG("[%s] sensor expo lines/us %d, %dus\n", __FUNCTION__, lines, *us);
     return SUCCESS;
 }
 
@@ -1379,7 +1393,7 @@ static int pCus_GetAEUSecs(ms_cus_sensor* handle, u32* us)
     lines |= (u32)(params->tExpo_reg[1].data & 0xff) << 8;
     lines |= (u32)(params->tExpo_reg[2].data & 0xf0) << 0;
     lines >>= 4;
-    *us = (lines * Preview_line_period) / 1000 / 2; // return us
+    *us = (lines * params->expo.line_period) / 1000 / 2; // return us
 
     SENSOR_DMSG("[%s] sensor expo lines/us %d, %dus\n", __FUNCTION__, lines, *us);
     return rc;
@@ -1394,7 +1408,7 @@ static int pCus_SetAEUSecs(ms_cus_sensor* handle, u32 us)
     memcpy(expo_reg_temp, params->tExpo_reg, sizeof(expo_reg_temp));
 
     // exposure is programmed in half lines; Preview_line_period in ns
-    half_lines = (2000 * us) / Preview_line_period;
+    half_lines = (2000 * us) / params->expo.line_period;
     if (half_lines < 3)
         half_lines = 3;
     if (half_lines > 2 * (params->expo.vts - 5)) {
@@ -1424,9 +1438,18 @@ static int pCus_SetAEUSecs(ms_cus_sensor* handle, u32 us)
 // Gain: 1x = 1024
 static int pCus_GetAEGain(ms_cus_sensor* handle, u32* gain)
 {
-    int rc = 0;
+    sc430ai_params* params = (sc430ai_params*)handle->private_data;
+    *gain = params->expo.final_gain;
+    return SUCCESS;
+}
 
-    return rc;
+static u32 sc430ai_clamp_gain(u32 gain)
+{
+    if (gain > SENSOR_MAXGAIN * 1024)
+        gain = SENSOR_MAXGAIN * 1024;
+    if (gain < 1024)
+        gain = 1024;
+    return gain;
 }
 
 static int pCus_SetAEGain_cal(ms_cus_sensor* handle, u32 gain)
@@ -1492,6 +1515,8 @@ static int pCus_SetAEGain(ms_cus_sensor* handle, u32 gain)
     int i;
 
     memcpy(gain_reg_temp, params->tGain_reg, sizeof(gain_reg_temp));
+    gain = sc430ai_clamp_gain(gain);
+    params->expo.final_gain = gain;
     sc430ai_calc_gain(gain, &params->tGain_reg[0].data, &params->tGain_reg[1].data, &params->tGain_reg[2].data);
 
     for (i = 0; i < ARRAY_SIZE(gain_reg); i++) {
@@ -1510,6 +1535,8 @@ static int pCus_SetAEGain_HDR_SEF(ms_cus_sensor* handle, u32 gain)
     int i;
 
     memcpy(gain_reg_temp, params->tGain_reg_HDR_SEF, sizeof(gain_reg_temp));
+    gain = sc430ai_clamp_gain(gain);
+    params->expo.final_gain = gain;
     sc430ai_calc_gain(gain, &params->tGain_reg_HDR_SEF[0].data, &params->tGain_reg_HDR_SEF[1].data, &params->tGain_reg_HDR_SEF[2].data);
 
     for (i = 0; i < ARRAY_SIZE(gain_reg_HDR_SEF); i++) {
@@ -1537,9 +1564,10 @@ static int pCus_GetAEMinMaxGain(ms_cus_sensor* handle, u32* min, u32* max)
 
 static int sc430ai_GetShutterInfo(struct __ms_cus_sensor* handle, CUS_SHUTTER_INFO* info)
 {
+    sc430ai_params* params = (sc430ai_params*)handle->private_data;
     info->max = 200000000; // 200 ms, as the stock driver
-    info->min = (Preview_line_period * 3) / 2; // 3 half lines
-    info->step = Preview_line_period / 2; // half line
+    info->min = (params->expo.line_period * 3) / 2; // 3 half lines
+    info->step = params->expo.line_period / 2; // half line
     return SUCCESS;
 }
 
@@ -1773,9 +1801,12 @@ int cus_camsensor_init_handle(ms_cus_sensor* drv_handle)
     handle->pCus_sensor_SetAEGain_cal = pCus_SetAEGain_cal;
     handle->pCus_sensor_setCaliData_gain_linearity = pCus_setCaliData_gain_linearity;
     handle->pCus_sensor_GetShutterInfo = sc430ai_GetShutterInfo;
-    params->expo.vts = vts_30fps;
+    params->expo.vts_base = 1650; // 2688x1520@30, until pCus_SetVideoRes picks a mode
+    params->expo.line_period = 20202;
+    params->expo.vts = params->expo.vts_base;
     params->expo.fps = 30;
     params->expo.line = 1000;
+    params->expo.final_gain = 1024;
     params->reg_dirty = false;
     params->orient_dirty = false;
 
@@ -1837,6 +1868,7 @@ int cus_camsensor_init_handle_HDR_SEF(ms_cus_sensor* drv_handle)
     params->expo.vts = vts_30fps_HDR;
     params->expo.line = 1000;
     params->expo.fps = 30;
+    params->expo.final_gain = 1024;
     params->expo.max_short_exp = 188;
 
     handle->ae_gain_delay = 2;
@@ -1968,7 +2000,7 @@ int cus_camsensor_init_handle_HDR_LEF(ms_cus_sensor* drv_handle)
     ///////////////////////////////////////////////////////
     // unit: micro seconds
     handle->pCus_sensor_AEStatusNotify = pCus_AEStatusNotify_HDR_LEF;
-    handle->pCus_sensor_GetAEUSecs = pCus_GetAEUSecs;
+    handle->pCus_sensor_GetAEUSecs = pCus_GetAEUSecs_HDR_LEF;
     handle->pCus_sensor_SetAEUSecs = pCus_SetAEUSecs_HDR_LEF;
     handle->pCus_sensor_GetAEGain = pCus_GetAEGain;
 
@@ -1984,6 +2016,7 @@ int cus_camsensor_init_handle_HDR_LEF(ms_cus_sensor* drv_handle)
 
     params->expo.vts = vts_30fps_HDR;
     params->expo.fps = 30;
+    params->expo.final_gain = 1024;
     params->expo.max_short_exp = 188;
     params->reg_dirty = false;
     params->vts_reg_dirty = false;
