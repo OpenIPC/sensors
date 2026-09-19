@@ -26,8 +26,8 @@ extern "C" {
 #endif
 
 /* SmartSens SC430AI, 4-lane MIPI, 2688x1520 / 2560x1440 (crop 64,40) @30fps, 2688x1520@60fps.
- * Ported for OpenIPC from the sc450ai driver; register tables and AE constants taken from the
- * TP-Link Tapo C120 stock driver (drv_ms_cus_sc430ai_MIPI_tp_ww, SigmaStar SDK build 202306132013).
+ * Ported for OpenIPC from the sc450ai driver; register tables and AE constants derived from the
+ * sensor's SigmaStar SDK driver.
  * HDR (DOL) paths keep the template structure and are untested on this sensor. */
 
 SENSOR_DRV_ENTRY_IMPL_BEGIN_EX(SC430AI);
