@@ -146,9 +146,9 @@ static struct {     // LINEAR
     {LINEAR_RES_1, {2592, 1944, 3, 25}, {0, 0, 2592, 1944}, {"2592x1944@25fps"}},
     {LINEAR_RES_2, {2592, 1944, 3, 40}, {0, 0, 2592, 1944}, {"2592x1944@40fps"}}, // Modify it
     {LINEAR_RES_3, {2592, 1944, 3, 59}, {0, 0, 2592, 1944}, {"2592x1944@59fps"}}, // Modify it
-    {LINEAR_RES_4, {2560, 1920, 3, 60}, {0, 0, 2560, 1920}, {"2560x1920@60fps"}},
-    {LINEAR_RES_5, {2208, 1248, 3, 90}, {0, 0, 2208, 1248}, {"2208x1248@90fps"}},
-    {LINEAR_RES_6, {1920, 1080, 3, 120}, {0, 0, 1920, 1080}, {"1920x1080@120fps"}},
+    {LINEAR_RES_4, {2560, 1920, 3, 60}, {16, 0, 2560, 1920}, {"2560x1920@60fps"}},   // centred in HNUM 2592
+    {LINEAR_RES_5, {2208, 1248, 3, 90}, {188, 0, 2208, 1248}, {"2208x1248@90fps"}},  // centred in HNUM 2584
+    {LINEAR_RES_6, {1920, 1080, 3, 120}, {12, 0, 1920, 1080}, {"1920x1080@120fps"}}, // centred in HNUM 1944
     
 };
 
@@ -210,6 +210,19 @@ u32 vts_30fps_HDR_DOL;
 static char *sensor_module_version = MACRO_TO_STRING(SENSOR_MODULE_VERSION);
 module_param(sensor_module_version, charp, S_IRUGO);
 #endif
+
+/* Vertical window of the window-cropping modes (WINMODE 4), in AREA3 units (2 per output line).
+   Left at the power-on defaults the window is 1964 lines from 176: a flip reads it from outside the
+   pixel array (a saturated white picture), and in the 90 and 120 fps modes the Bayer phase is off.
+   The start sets the Bayer phase: these values keep the driver's CUS_BAYER_GB in both directions
+   (start and start + width alike, as measured), and the window centred on the array. The sensor
+   sends a few more columns than the picture (HNUM); the crop in imx335_mipi_linear takes the centre
+   of them, so a mirror shows the same scene. */
+static const struct { u32 res; u16 start, width; } window_modes[] = {
+    { 3, 200, 3840 },   // 2560x1920@60
+    { 4, 894, 2496 },   // 2208x1248@90
+    { 5, 1042, 2160 },  // 1920x1080@120
+};
 
 //static int pCus_SetAEGain(ms_cus_sensor *handle, u32 gain);
 static int pCus_SetAEUSecs(ms_cus_sensor *handle, u32 us);
@@ -1002,6 +1015,14 @@ const static I2C_ARRAY Sensor_init_table_4lane_5m60fps_1920[] =
     {0x3046,0x70},
     {0x3047,0x10},
 
+    /* Explicit vertical window (see window_modes): 1920 lines from AREA3 start 200. */
+    {0x3056,0x80}, // Y_OUT_SIZE: 1920
+    {0x3057,0x07},
+    {0x3074,0xC8}, // AREA3_ST_ADR_1: 200
+    {0x3075,0x00},
+    {0x3076,0x00}, // AREA3_WIDTH_1: 3840
+    {0x3077,0x0F},
+
     /* Output bit depth and exposure timing. */
     {0x3050,0x00}, // ADBIT: 10-bit ADC
     {0x3051,0x02},
@@ -1275,6 +1296,14 @@ const static I2C_ARRAY Sensor_init_table_4lane_90fps[] =
     {0x3045,0x00},
     {0x3046,0x70},
     {0x3047,0x10},
+
+    /* Explicit vertical window (see window_modes): 1248 lines from AREA3 start 894. */
+    {0x3056,0xE0}, // Y_OUT_SIZE: 1248
+    {0x3057,0x04},
+    {0x3074,0x7E}, // AREA3_ST_ADR_1: 894
+    {0x3075,0x03},
+    {0x3076,0xC0}, // AREA3_WIDTH_1: 2496
+    {0x3077,0x09},
     {0x3050,0x00},
     {0x3051,0x02},
     {0x3052,0x00},
@@ -1529,6 +1558,14 @@ const static I2C_ARRAY Sensor_init_table_4lane_120fps[] =
     {0x3045,0x00},
     {0x3046,0x70},
     {0x3047,0x10},
+
+    /* Explicit vertical window (see window_modes): 1080 lines from AREA3 start 1042. */
+    {0x3056,0x38}, // Y_OUT_SIZE: 1080
+    {0x3057,0x04},
+    {0x3074,0x12}, // AREA3_ST_ADR_1: 1042
+    {0x3075,0x04},
+    {0x3076,0x70}, // AREA3_WIDTH_1: 2160
+    {0x3077,0x08},
     {0x3050,0x00},
     {0x3051,0x02},
     {0x3052,0x00},
@@ -3902,6 +3939,17 @@ static int DoOrien(ms_cus_sensor *handle, CUS_CAMSENSOR_ORIT orit)
         default :
             handle->orient = CUS_ORIT_M0F0;
             break;
+    }
+
+    /* The window-cropping modes read their vertical window bottom-up under flip: the window starts
+       at its far end, start + width, to cover the same rows. */
+    for (i = 0; i < ARRAY_SIZE(window_modes); i++) {
+        if (window_modes[i].res == handle->video_res_supported.ulcur_res) {
+            int flip = handle->orient == CUS_ORIT_M0F1 || handle->orient == CUS_ORIT_M1F1;
+            u16 st = window_modes[i].start + (flip ? window_modes[i].width : 0);
+            SensorReg_Write(0x3074, st & 0xFF); // AREA3_ST_ADR_1
+            SensorReg_Write(0x3075, st >> 8);
+        }
     }
     return SUCCESS;
 }
