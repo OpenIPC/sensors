@@ -214,14 +214,14 @@ module_param(sensor_module_version, charp, S_IRUGO);
 /* Vertical window of the window-cropping modes (WINMODE 4), in AREA3 units (2 per output line).
    Left at the power-on defaults the window is 1964 lines from 176: a flip reads it from outside the
    pixel array (a saturated white picture), and in the 90 and 120 fps modes the Bayer phase is off.
-   The start sets the Bayer phase: these values keep the driver's CUS_BAYER_GB in both directions
-   (start and start + width alike, as measured), and the window centred on the array. The sensor
-   sends a few more columns than the picture (HNUM); the crop in imx335_mipi_linear takes the centre
-   of them, so a mirror shows the same scene. */
+   The start sets the Bayer phase: a multiple of 4 gives RGGB, as in the full modes, in both
+   directions (start and start + width alike, as measured); the window is centred on the array.
+   The sensor sends a few more columns than the picture (HNUM); the crop in imx335_mipi_linear
+   takes the centre of them, so a mirror shows the same scene. */
 static const struct { u32 res; u16 start, width; } window_modes[] = {
     { 3, 200, 3840 },   // 2560x1920@60
-    { 4, 894, 2496 },   // 2208x1248@90
-    { 5, 1042, 2160 },  // 1920x1080@120
+    { 4, 892, 2496 },   // 2208x1248@90
+    { 5, 1040, 2160 },  // 1920x1080@120
 };
 
 //static int pCus_SetAEGain(ms_cus_sensor *handle, u32 gain);
@@ -233,17 +233,10 @@ static int pCus_SetAEUSecsHDR_DOL_LEF(ms_cus_sensor *handle, u32 us);
 
 static u32 imx335_get_linear_bayer_id(u32 res_idx)
 {
-    switch (res_idx) {
-        case LINEAR_RES_4:
-        case LINEAR_RES_5:
-        case LINEAR_RES_6:
-            return CUS_BAYER_GB;
-        case LINEAR_RES_1:
-        case LINEAR_RES_2:
-        case LINEAR_RES_3:
-        default:
-            return CUS_BAYER_RG;
-    }
+    /* Every linear mode delivers RGGB: the window-cropping modes start their vertical window
+       on a multiple of 4 AREA3 units (window_modes), which keeps the phase of the full modes. */
+    (void)res_idx;
+    return CUS_BAYER_RG;
 }
 
 typedef struct {
@@ -1297,10 +1290,10 @@ const static I2C_ARRAY Sensor_init_table_4lane_90fps[] =
     {0x3046,0x70},
     {0x3047,0x10},
 
-    /* Explicit vertical window (see window_modes): 1248 lines from AREA3 start 894. */
+    /* Explicit vertical window (see window_modes): 1248 lines from AREA3 start 892. */
     {0x3056,0xE0}, // Y_OUT_SIZE: 1248
     {0x3057,0x04},
-    {0x3074,0x7E}, // AREA3_ST_ADR_1: 894
+    {0x3074,0x7C}, // AREA3_ST_ADR_1: 892
     {0x3075,0x03},
     {0x3076,0xC0}, // AREA3_WIDTH_1: 2496
     {0x3077,0x09},
@@ -1559,10 +1552,10 @@ const static I2C_ARRAY Sensor_init_table_4lane_120fps[] =
     {0x3046,0x70},
     {0x3047,0x10},
 
-    /* Explicit vertical window (see window_modes): 1080 lines from AREA3 start 1042. */
+    /* Explicit vertical window (see window_modes): 1080 lines from AREA3 start 1040. */
     {0x3056,0x38}, // Y_OUT_SIZE: 1080
     {0x3057,0x04},
-    {0x3074,0x12}, // AREA3_ST_ADR_1: 1042
+    {0x3074,0x10}, // AREA3_ST_ADR_1: 1040
     {0x3075,0x04},
     {0x3076,0x70}, // AREA3_WIDTH_1: 2160
     {0x3077,0x08},
