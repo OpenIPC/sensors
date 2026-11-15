@@ -215,14 +215,30 @@ module_param(sensor_module_version, charp, S_IRUGO);
    Left at the power-on defaults the window is 1964 lines from 176: a flip reads it from outside the
    pixel array (a saturated white picture), and in the 90 and 120 fps modes the Bayer phase is off.
    The start sets the Bayer phase: a multiple of 4 gives RGGB, as in the full modes, in both
-   directions (start and start + width alike, as measured); the window is centred on the array.
+   directions (start and start + width alike, as measured). Every window is centred on the
+   power-on one, at AREA3 2140. The init tables write these values in standby; DoOrien moves the
+   start under flip.
    The sensor sends a few more columns than the picture (HNUM); the crop in imx335_mipi_linear
    takes the centre of them, so a mirror shows the same scene. */
-static const struct { u32 res; u16 start, width; } window_modes[] = {
-    { 3, 200, 3840 },   // 2560x1920@60
-    { 4, 892, 2496 },   // 2208x1248@90
-    { 5, 1040, 2160 },  // 1920x1080@120
-};
+#define WIN_60FPS_Y      1920
+#define WIN_60FPS_START  220
+#define WIN_60FPS_WIDTH  3840
+#define WIN_90FPS_Y      1248
+#define WIN_90FPS_START  892
+#define WIN_90FPS_WIDTH  2496
+#define WIN_120FPS_Y     1080
+#define WIN_120FPS_START 1060
+#define WIN_120FPS_WIDTH 2160
+
+#define WIN_REGS(y, start, width) \
+    {0x3056, (y) & 0xFF}, {0x3057, (y) >> 8},          /* Y_OUT_SIZE */ \
+    {0x3074, (start) & 0xFF}, {0x3075, (start) >> 8},  /* AREA3_ST_ADR_1 */ \
+    {0x3076, (width) & 0xFF}, {0x3077, (width) >> 8}   /* AREA3_WIDTH_1 */
+
+struct imx335_window { u16 start, width; };
+static const struct imx335_window win_60fps  = { WIN_60FPS_START,  WIN_60FPS_WIDTH };
+static const struct imx335_window win_90fps  = { WIN_90FPS_START,  WIN_90FPS_WIDTH };
+static const struct imx335_window win_120fps = { WIN_120FPS_START, WIN_120FPS_WIDTH };
 
 //static int pCus_SetAEGain(ms_cus_sensor *handle, u32 gain);
 static int pCus_SetAEUSecs(ms_cus_sensor *handle, u32 us);
@@ -230,14 +246,6 @@ static int pCus_SetAEUSecs(ms_cus_sensor *handle, u32 us);
 static int pCus_SetOrien(ms_cus_sensor *handle, CUS_CAMSENSOR_ORIT orit);
 static int pCus_SetAEUSecsHDR_DOL_SEF1(ms_cus_sensor *handle, u32 us);
 static int pCus_SetAEUSecsHDR_DOL_LEF(ms_cus_sensor *handle, u32 us);
-
-static u32 imx335_get_linear_bayer_id(u32 res_idx)
-{
-    /* Every linear mode delivers RGGB: the window-cropping modes start their vertical window
-       on a multiple of 4 AREA3 units (window_modes), which keeps the phase of the full modes. */
-    (void)res_idx;
-    return CUS_BAYER_RG;
-}
 
 typedef struct {
     struct {
@@ -291,6 +299,7 @@ typedef struct {
     int video_min_fps;
     bool dirty;
     bool orien_dirty;
+    const struct imx335_window *win;  // window-cropping init active, NULL otherwise
     I2C_ARRAY tVts_reg[3];
     I2C_ARRAY tGain_reg[2];
     I2C_ARRAY tExpo_reg[3];
@@ -1008,13 +1017,8 @@ const static I2C_ARRAY Sensor_init_table_4lane_5m60fps_1920[] =
     {0x3046,0x70},
     {0x3047,0x10},
 
-    /* Explicit vertical window (see window_modes): 1920 lines from AREA3 start 200. */
-    {0x3056,0x80}, // Y_OUT_SIZE: 1920
-    {0x3057,0x07},
-    {0x3074,0xC8}, // AREA3_ST_ADR_1: 200
-    {0x3075,0x00},
-    {0x3076,0x00}, // AREA3_WIDTH_1: 3840
-    {0x3077,0x0F},
+    /* Explicit vertical window. */
+    WIN_REGS(WIN_60FPS_Y, WIN_60FPS_START, WIN_60FPS_WIDTH),
 
     /* Output bit depth and exposure timing. */
     {0x3050,0x00}, // ADBIT: 10-bit ADC
@@ -1290,13 +1294,8 @@ const static I2C_ARRAY Sensor_init_table_4lane_90fps[] =
     {0x3046,0x70},
     {0x3047,0x10},
 
-    /* Explicit vertical window (see window_modes): 1248 lines from AREA3 start 892. */
-    {0x3056,0xE0}, // Y_OUT_SIZE: 1248
-    {0x3057,0x04},
-    {0x3074,0x7C}, // AREA3_ST_ADR_1: 892
-    {0x3075,0x03},
-    {0x3076,0xC0}, // AREA3_WIDTH_1: 2496
-    {0x3077,0x09},
+    /* Explicit vertical window. */
+    WIN_REGS(WIN_90FPS_Y, WIN_90FPS_START, WIN_90FPS_WIDTH),
     {0x3050,0x00},
     {0x3051,0x02},
     {0x3052,0x00},
@@ -1552,13 +1551,8 @@ const static I2C_ARRAY Sensor_init_table_4lane_120fps[] =
     {0x3046,0x70},
     {0x3047,0x10},
 
-    /* Explicit vertical window (see window_modes): 1080 lines from AREA3 start 1040. */
-    {0x3056,0x38}, // Y_OUT_SIZE: 1080
-    {0x3057,0x04},
-    {0x3074,0x10}, // AREA3_ST_ADR_1: 1040
-    {0x3075,0x04},
-    {0x3076,0x70}, // AREA3_WIDTH_1: 2160
-    {0x3077,0x08},
+    /* Explicit vertical window. */
+    WIN_REGS(WIN_120FPS_Y, WIN_120FPS_START, WIN_120FPS_WIDTH),
     {0x3050,0x00},
     {0x3051,0x02},
     {0x3052,0x00},
@@ -3366,6 +3360,16 @@ static int pCus_init_mipi4lane_5m60fps_linear(ms_cus_sensor *handle)
     return SUCCESS;
 }
 
+/* Record the window of a window-cropping init. The tables write the unflipped start and leave
+   mirror/flip as they were, so reapply the orientation on the next frame. */
+static void imx335_window_set(ms_cus_sensor *handle, const struct imx335_window *win)
+{
+    imx335_params *params = (imx335_params *)handle->private_data;
+
+    params->win = win;
+    params->orien_dirty = true;
+}
+
 static int pCus_init_mipi4lane_5m60fps_1920_linear(ms_cus_sensor *handle)
 {
     int i,cnt=0;
@@ -3391,6 +3395,7 @@ static int pCus_init_mipi4lane_5m60fps_1920_linear(ms_cus_sensor *handle)
             }
         }
     }
+    imx335_window_set(handle, &win_60fps);
     return SUCCESS;
 }
 
@@ -3419,6 +3424,7 @@ static int pCus_init_mipi4lane_90fps_linear(ms_cus_sensor *handle)
             }
         }
     }
+    imx335_window_set(handle, &win_90fps);
     return SUCCESS;
 }
 
@@ -3447,6 +3453,7 @@ static int pCus_init_mipi4lane_120fps_linear(ms_cus_sensor *handle)
             }
         }
     }
+    imx335_window_set(handle, &win_120fps);
     return SUCCESS;
 }
 
@@ -3638,6 +3645,7 @@ static int pCus_SetVideoRes(ms_cus_sensor *handle, u32 res_idx)
     if (res_idx >= num_res) {
         return FAIL;
     }
+    params->win = NULL;  // set again by a window-cropping init
 
     SENSOR_EMSG("[%s] INIT DRIVER pCus_SetVideoRes->res_idx:[%d]}!\n", __FUNCTION__,res_idx);
     SENSOR_EMSG("[%s]  Sensor res_idx: [%d]  pCus_SetVideoRes !!!!\n", __FUNCTION__,res_idx);
@@ -3787,7 +3795,8 @@ static int pCus_SetVideoRes(ms_cus_sensor *handle, u32 res_idx)
             break;
     }
 
-    handle->bayer_id = imx335_get_linear_bayer_id(handle->video_res_supported.ulcur_res);
+    /* RGGB in every linear mode: the window-cropping starts are multiples of 4 (WIN_*_START). */
+    handle->bayer_id = CUS_BAYER_RG;
 
     if (invalid_lane_num) {
         SENSOR_EMSG("[%s] unsupported lane_num=%d, fallback init=%s\n",
@@ -3813,6 +3822,7 @@ static int pCus_SetVideoRes_HDR_DOL(ms_cus_sensor *handle, u32 res_idx)
     if (res_idx >= num_res) {
         return FAIL;
     }
+    params->win = NULL;
     switch (res_idx) {
 
         case 0:
@@ -3891,6 +3901,7 @@ static int pCus_SetOrien(ms_cus_sensor *handle, CUS_CAMSENSOR_ORIT orit)
 
 static int DoOrien(ms_cus_sensor *handle, CUS_CAMSENSOR_ORIT orit)
 {
+    imx335_params *params = (imx335_params *)handle->private_data;
     int table_length = ARRAY_SIZE(mirr_flip_table);
     int seg_length = table_length/4;
     int i,j;
@@ -3936,13 +3947,11 @@ static int DoOrien(ms_cus_sensor *handle, CUS_CAMSENSOR_ORIT orit)
 
     /* The window-cropping modes read their vertical window bottom-up under flip: the window starts
        at its far end, start + width, to cover the same rows. */
-    for (i = 0; i < ARRAY_SIZE(window_modes); i++) {
-        if (window_modes[i].res == handle->video_res_supported.ulcur_res) {
-            int flip = handle->orient == CUS_ORIT_M0F1 || handle->orient == CUS_ORIT_M1F1;
-            u16 st = window_modes[i].start + (flip ? window_modes[i].width : 0);
-            SensorReg_Write(0x3074, st & 0xFF); // AREA3_ST_ADR_1
-            SensorReg_Write(0x3075, st >> 8);
-        }
+    if (params->win) {
+        int flip = handle->orient == CUS_ORIT_M0F1 || handle->orient == CUS_ORIT_M1F1;
+        u16 st = params->win->start + (flip ? params->win->width : 0);
+        SensorReg_Write(0x3074, st & 0xFF); // AREA3_ST_ADR_1
+        SensorReg_Write(0x3075, st >> 8);
     }
     return SUCCESS;
 }
@@ -4357,6 +4366,7 @@ int cus_camsensor_init_handle_linear(ms_cus_sensor* drv_handle)
     params = (imx335_params *)handle->private_data;
     memcpy(params->tGain_reg, gain_reg, sizeof(gain_reg));
     memcpy(params->tExpo_reg, expo_reg, sizeof(expo_reg));
+    params->win = NULL;
     memcpy(params->tVts_reg, vts_reg, sizeof(vts_reg));
     //memcpy(params->tExpo_rhs1_reg, expo_rhs1_reg, sizeof(expo_rhs1_reg));
     //memcpy(params->tExpo_shr_dol1_reg, expo_shr_dol1_reg, sizeof(expo_shr_dol1_reg));
@@ -4389,7 +4399,7 @@ int cus_camsensor_init_handle_linear(ms_cus_sensor* drv_handle)
     handle->sif_bus               = SENSOR_IFBUS_TYPE;
     handle->data_prec             = SENSOR_DATAPREC;
     handle->data_mode             = SENSOR_DATAMODE;
-    handle->bayer_id              = imx335_get_linear_bayer_id(LINEAR_RES_1);
+    handle->bayer_id              = CUS_BAYER_RG;  // every linear mode, see WIN_*_START
     handle->RGBIR_id              = SENSOR_RGBIRID;
     handle->orient                = SENSOR_ORIT;
     //handle->YC_ODER               = SENSOR_YCORDER;   //CUS_SEN_YCODR_CY;
@@ -4512,6 +4522,7 @@ int cus_camsensor_init_handle_hdr_dol_sef1(ms_cus_sensor* drv_handle)
     }
 
     params = (imx335_params *)handle->private_data;
+    params->win = NULL;
     memcpy(params->tExpo_rhs1_reg, expo_rhs1_reg, sizeof(expo_rhs1_reg));
     memcpy(params->tExpo_shr_dol1_reg, expo_shr_dol1_reg, sizeof(expo_shr_dol1_reg));
     memcpy(params->tGain_hdr_dol_sef_reg, gain_HDR_DOL_SEF1_reg, sizeof(gain_HDR_DOL_SEF1_reg));
@@ -4875,6 +4886,7 @@ static int cus_camsensor_init_handle_hdr_dol_lef(ms_cus_sensor* drv_handle)
         return FAIL;
     }
     params = (imx335_params *)handle->private_data;
+    params->win = NULL;
     memcpy(params->tVts_reg, vts_reg, sizeof(vts_reg));
     memcpy(params->tExpo_reg, expo_reg, sizeof(expo_reg));
     memcpy(params->tGain_hdr_dol_lef_reg, gain_HDR_DOL_LEF_reg, sizeof(gain_HDR_DOL_LEF_reg));
