@@ -1654,6 +1654,17 @@ static int pCus_GetAEMinMaxGain(ms_cus_sensor* handle, u32* min, u32* max)
     return SUCCESS;
 }
 
+/* The short exposure's own range: analog only, the ceiling its gain setter
+ * clamps to. Without one the ISP reads 0..0 for it, refuses the tuning
+ * file's short-exposure plan ("pAE_SetPlainShortExpTbl ... HW:0/0 ...
+ * Plain Table is not valid!") and runs HDR on its built-in one. */
+static int pCus_GetAEMinMaxGain_HDR_SEF(ms_cus_sensor* handle, u32* min, u32* max)
+{
+    *min = 1024;
+    *max = SENSOR_MAX_AGAIN;
+    return SUCCESS;
+}
+
 static int sc850sl_GetShutterInfo(struct __ms_cus_sensor* handle, CUS_SHUTTER_INFO* info)
 {
     info->max = 1000000000 / Preview_MIN_FPS;
@@ -2000,6 +2011,7 @@ int cus_camsensor_init_handle_HDR_SEF(ms_cus_sensor* drv_handle)
     handle->pCus_sensor_SetAEUSecs = pCus_SetAEUSecs_HDR_SEF;
     handle->pCus_sensor_GetAEGain = pCus_GetAEGain;
     handle->pCus_sensor_SetAEGain = pCus_SetAEGain_HDR_SEF;
+    handle->pCus_sensor_GetAEMinMaxGain = pCus_GetAEMinMaxGain_HDR_SEF;
     handle->pCus_sensor_GetShutterInfo = sc850sl_GetShutterInfo_HDR_SEF;
 
     params->expo.vts = vts_15fps_HDR;
