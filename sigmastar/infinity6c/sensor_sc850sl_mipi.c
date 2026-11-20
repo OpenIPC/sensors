@@ -62,7 +62,12 @@ SENSOR_DRV_ENTRY_IMPL_BEGIN_EX(sc850sl);
 #define SENSOR_BAYERID_HDR CUS_BAYER_BG // CUS_BAYER_GB, CUS_BAYER_GR, CUS_BAYER_BG, CUS_BAYER_RG
 #define SENSOR_RGBIRID CUS_RGBIR_NONE
 #define SENSOR_ORIT CUS_ORIT_M0F0 // CUS_ORIT_M0F0, CUS_ORIT_M1F0, CUS_ORIT_M0F1, CUS_ORIT_M1F1,
-#define SENSOR_MAXGAIN 50790 // max sensor Again
+#define SENSOR_MAX_AGAIN 50790 // analog alone: 3.125 DCG x 8 coarse x 127/64 fine
+/* Analog fully open, then the sensor's 2x/4x/8x digital coarse stages on 0x3e06. The
+ * vendor's SC850SL tuning files plan exposure up to 384000 (375x); the ISP rejects a
+ * plan that asks for more gain than the driver reports ("Plain Table is not valid!")
+ * and falls back to its built-in 14 ms x 8x one, which left night pictures dark. */
+#define SENSOR_MAXGAIN (SENSOR_MAX_AGAIN * 8)
 #define Preview_MCLK_SPEED CUS_CMU_CLK_27MHZ // CFG //CUS_CMU_CLK_12M, CUS_CMU_CLK_16M, CUS_CMU_CLK_24M, CUS_CMU_CLK_27M
 #define Preview_MCLK_SPEED_HDR CUS_CMU_CLK_27MHZ
 
@@ -1492,9 +1497,9 @@ static int pCus_SetAEGain_cal(ms_cus_sensor* handle, u32 gain)
 static int pCus_SetAEGain(ms_cus_sensor* handle, u32 gain)
 {
     sc850sl_params* params = (sc850sl_params*)handle->private_data;
-    u8 i = 0, Coarse_gain = 1;
+    u8 i = 0, Coarse_gain = 1, Dig_gain = 1;
     u32 Dcg_gainx1024 = 1024;
-    u8 Coarse_gain_reg = 0x03, ANA_Fine_gain_reg = 0x40;
+    u8 Coarse_gain_reg = 0x03, ANA_Fine_gain_reg = 0x40, Dig_coarse_reg = 0x00;
     I2C_ARRAY gain_reg_temp[] = {
         { 0x3e06, 0x00 },
         { 0x3e08, 0x03 },
@@ -1534,18 +1539,30 @@ static int pCus_SetAEGain(ms_cus_sensor* handle, u32 gain)
         Coarse_gain = 4;
         Dcg_gainx1024 = 3200;
         Coarse_gain_reg = 0x2f;
-    } else if (gain <= SENSOR_MAXGAIN) // 49.6 * 1024 // end again
+    } else // 25x and up: analog fully open, digital coarse on top
     {
         Coarse_gain = 8;
         Dcg_gainx1024 = 3200;
         Coarse_gain_reg = 0x3f;
+        if (gain >= 25600 * 8) {
+            Dig_gain = 8;
+            Dig_coarse_reg = 0x07;
+        } else if (gain >= 25600 * 4) {
+            Dig_gain = 4;
+            Dig_coarse_reg = 0x03;
+        } else if (gain >= 25600 * 2) {
+            Dig_gain = 2;
+            Dig_coarse_reg = 0x01;
+        }
     }
 
-    ANA_Fine_gain_reg = abs(64 * gain / (Dcg_gainx1024 * Coarse_gain));
+    ANA_Fine_gain_reg = 64 * gain / (Dcg_gainx1024 * Coarse_gain * Dig_gain);
+    if (ANA_Fine_gain_reg > 0x7f)
+        ANA_Fine_gain_reg = 0x7f;
 
     params->tGain_reg[2].data = ANA_Fine_gain_reg;
     params->tGain_reg[1].data = Coarse_gain_reg;
-    params->tGain_reg[0].data = 0x00;
+    params->tGain_reg[0].data = Dig_coarse_reg;
 
     for (i = 0; i < ARRAY_SIZE(gain_reg); i++) {
         if (params->tGain_reg[i].data != gain_reg_temp[i].data) {
@@ -1571,8 +1588,8 @@ static int pCus_SetAEGain_HDR_SEF(ms_cus_sensor* handle, u32 gain)
 
     if (gain <= 1024) {
         gain = 1024;
-    } else if (gain > SENSOR_MAXGAIN) {
-        gain = SENSOR_MAXGAIN;
+    } else if (gain > SENSOR_MAX_AGAIN) {
+        gain = SENSOR_MAX_AGAIN;
     }
     params->expo.final_gain = gain;
 
@@ -1601,7 +1618,7 @@ static int pCus_SetAEGain_HDR_SEF(ms_cus_sensor* handle, u32 gain)
         Coarse_gain = 4;
         Dcg_gainx1024 = 3200;
         Coarse_gain_reg = 0x2f;
-    } else if (gain <= SENSOR_MAXGAIN) // 49.6 * 1024 // end again
+    } else if (gain <= SENSOR_MAX_AGAIN) // 49.6 * 1024 // end again
     {
         Coarse_gain = 8;
         Dcg_gainx1024 = 3200;
